@@ -1,14 +1,13 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading;
 
 namespace SAPEntityFramework.Extensions.Http
 {
     internal static class HttpClientExtensions
     {
         /// <summary>
-        /// Serializa un objeto y lo envía como Json
+        /// Manda un post con Json
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="client">Cliente Http</param>
@@ -31,6 +30,25 @@ namespace SAPEntityFramework.Extensions.Http
                 }
 
                 return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new SLException("Error al realizar la petición", null, ex);
+            }
+        }
+
+        public static async Task PostJsonAsync(this HttpClient client, string requestUri, object body, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var content = new StringContent(JsonSerializer.Serialize(body));
+                using var response = await client.PostAsync(requestUri, content, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var ex = await GetExceptionAsync(response, cancellationToken);
+                    throw ex;
+                }
             }
             catch (HttpRequestException ex)
             {
