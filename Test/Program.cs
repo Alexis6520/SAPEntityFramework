@@ -3,7 +3,7 @@ using Test;
 
 var options = new SLContextOptions()
 {
-    Url = "https://10.10.50.112:50000/b1s/v2",
+    Url = "https://10.10.50.112:50000",
     UserName = "manager",
     Password = "nueva2017",
     Language = 25,
@@ -11,6 +11,7 @@ var options = new SLContextOptions()
 };
 
 using var slContext = new AppSLContext(options);
-await slContext.LoginAsync();
+var item = await slContext.Items.FindAsync("B-T203-T/O");
+var partner = await slContext.BusinessPartners.FindAsync("B-T203-T/O");
 Console.Write("Prueba terminada");
 Console.ReadLine();

@@ -9,7 +9,6 @@ namespace SAPEntityFramework
     {
         private SLContextOptions _options;
         private SLSession _session;
-        private readonly HttpClient _httpClient;
 
         public SLContext(SLContextOptions options)
         {
@@ -20,11 +19,15 @@ namespace SAPEntityFramework
                 ServerCertificateCustomValidationCallback = (a, b, c, d) => { return true; }
             };
 
-            _httpClient = new HttpClient(handler)
+            HttpClient = new HttpClient(handler)
             {
-                BaseAddress = new Uri(_options.Url, UriKind.RelativeOrAbsolute)
+                BaseAddress = new Uri(_options.Url)
             };
+
+            InitializeSets();
         }
+
+        public HttpClient HttpClient { get; private set; }
 
         /// <summary>
         /// Inicia sesión en Service Layer
@@ -50,17 +53,29 @@ namespace SAPEntityFramework
                 _options.Language
             };
 
-            _session = await _httpClient.PostJsonAsync<SLSession>("/b1s/v2/Login", body, cancellationToken);
+            _session = await HttpClient.PostJsonAsync<SLSession>("b1s/v2/Login", body, cancellationToken);
             _session.LastLogin = DateTime.Now.AddSeconds(1);
-            _httpClient.DefaultRequestHeaders.Remove("B1SESSION");
-            _httpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
+            HttpClient.DefaultRequestHeaders.Remove("B1SESSION");
+            HttpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
+        }
+
+        private void InitializeSets()
+        {
+            var setsProps = GetType().GetProperties()
+                .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(SLSet<>));
+
+            foreach (var set in setsProps)
+            {
+                var instance = Activator.CreateInstance(set.PropertyType, this, set.Name);
+                set.SetValue(this, instance);
+            }
         }
 
         public void Dispose()
         {
             _options = null;
             _session = null;
-            _httpClient.Dispose();
+            HttpClient.Dispose();
             GC.SuppressFinalize(this);
         }
     }
