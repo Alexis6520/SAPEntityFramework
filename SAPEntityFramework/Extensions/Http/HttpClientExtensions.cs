@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 
 namespace SAPEntityFramework.Extensions.Http
 {
@@ -25,19 +26,7 @@ namespace SAPEntityFramework.Extensions.Http
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    SLException ex = null;
-
-                    if (response.StatusCode != HttpStatusCode.NotFound)
-                    {
-                        var errorResponse = await response.Content.ReadFromJsonAsync<SLErrorResponse>(cancellationToken: cancellationToken);
-                        var error = errorResponse.Error;
-                        ex = new SLException(error.Message, error.Code);
-                    }
-                    else
-                    {
-                        ex = new SLException("Ruta no encontrada");
-                    }
-
+                    var ex = await GetExceptionAsync(response, cancellationToken);
                     throw ex;
                 }
 
@@ -46,6 +35,22 @@ namespace SAPEntityFramework.Extensions.Http
             catch (HttpRequestException ex)
             {
                 throw new SLException("Error al realizar la petición", null, ex);
+            }
+        }
+
+        private static async Task<SLException> GetExceptionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+        {
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    return new SLException("Ruta no encontrada", "404");
+                case HttpStatusCode.BadRequest:
+                    var errorResponse = await response.Content.ReadFromJsonAsync<SLErrorResponse>(cancellationToken: cancellationToken);
+                    var error = errorResponse.Error;
+                    return new SLException(error.Message, error.Code);
+                default:
+                    var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                    return new SLException(stringContent);
             }
         }
     }

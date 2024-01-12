@@ -22,7 +22,7 @@ namespace SAPEntityFramework
 
             _httpClient = new HttpClient(handler)
             {
-                BaseAddress = new Uri(_options.Url,new UriCreationOptions { })
+                BaseAddress = new Uri(_options.Url, UriKind.RelativeOrAbsolute)
             };
         }
 
@@ -47,11 +47,13 @@ namespace SAPEntityFramework
                 _options.CompanyDB,
                 _options.UserName,
                 _options.Password,
-                //_options.Language
+                _options.Language
             };
 
             _session = await _httpClient.PostJsonAsync<SLSession>("/b1s/v2/Login", body, cancellationToken);
             _session.LastLogin = DateTime.Now.AddSeconds(1);
+            _httpClient.DefaultRequestHeaders.Remove("B1SESSION");
+            _httpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
         }
 
         public void Dispose()
