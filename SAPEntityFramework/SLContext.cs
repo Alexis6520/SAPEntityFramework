@@ -53,7 +53,7 @@ namespace SAPEntityFramework
                 _options.Language
             };
 
-            _session = await HttpClient.PostJsonAsync<SLSession>("b1s/v2/Login", body, cancellationToken);
+            _session = await HttpClient.PostJsonAsync<SLSession>("Login", body, cancellationToken);
             _session.LastLogin = DateTime.Now.AddSeconds(1);
             HttpClient.DefaultRequestHeaders.Remove("B1SESSION");
             HttpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);

@@ -1,7 +1,6 @@
 ﻿using SAPEntityFramework.Extensions.Http;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using System.Web;
 
 namespace SAPEntityFramework
 {
@@ -40,7 +39,7 @@ namespace SAPEntityFramework
                 filter = $"({key})";
             }
 
-            return await _slContext.HttpClient.GetJsonAsync<T>($"b1s/v2/{_path}{filter}", cancellationToken);
+            return await _slContext.HttpClient.GetJsonAsync<T>($"{_path}{filter}", cancellationToken);
         }
     }
 }

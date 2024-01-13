@@ -33,7 +33,7 @@ namespace SAPEntityFramework.Extensions.Http
             }
             catch (HttpRequestException ex)
             {
-                throw new SLException("Error al realizar la petición", null, ex);
+                throw new SLException("No se pudo h¿realizar la petición a Service Layer", null, ex);
             }
         }
 
@@ -97,17 +97,16 @@ namespace SAPEntityFramework.Extensions.Http
 
         private static async Task<SLException> GetExceptionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            switch (response.StatusCode)
+            try
             {
-                case HttpStatusCode.NotFound:
-                    return new SLException("Ruta no encontrada", "404");
-                case HttpStatusCode.BadRequest:
-                    var errorResponse = await response.Content.ReadFromJsonAsync<SLErrorResponse>(cancellationToken: cancellationToken);
-                    var error = errorResponse.Error;
-                    return new SLException(error.Message, error.Code);
-                default:
-                    var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                    return new SLException(stringContent);
+                var errorResponse = await response.Content.ReadFromJsonAsync<SLErrorResponse>(cancellationToken: cancellationToken);
+                var error = errorResponse.Error;
+                return new SLException(error.Message, error.Code);
+            }
+            catch (Exception)
+            {
+                var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                return new SLException(stringContent, $"{response.StatusCode}");
             }
         }
     }
