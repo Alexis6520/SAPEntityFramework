@@ -64,6 +64,17 @@ namespace SAPEntityFramework
             HttpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
         }
 
+        public void Logout(CancellationToken cancellationToken = default)
+        {
+            if (_session == null || _session.IsExpired)
+            {
+                return;
+            }
+
+            var task = HttpClient.PostAsync("Logout", null, cancellationToken: cancellationToken);
+            task.Wait(cancellationToken);
+        }
+
         private void InitializeSets()
         {
             var setsProps = GetType().GetProperties()
@@ -78,6 +89,7 @@ namespace SAPEntityFramework
 
         public void Dispose()
         {
+            Logout();
             _options = null;
             _session = null;
             HttpClient.Dispose();
