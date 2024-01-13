@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace SAPEntityFramework.Extensions.Http
@@ -7,12 +6,12 @@ namespace SAPEntityFramework.Extensions.Http
     internal static class HttpClientExtensions
     {
         /// <summary>
-        /// Manda un post con Json
+        /// Post con Json que devuelve respuesta deserializada
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Tipo a devolver</typeparam>
         /// <param name="client">Cliente Http</param>
         /// <param name="requestUri">Ruta</param>
-        /// <param name="body">Objeto</param>
+        /// <param name="body">Objeto a enviar como Json</param>
         /// <param name="cancellationToken">Token de cancelación</param>
         /// <returns></returns>
         /// <exception cref="SLException"></exception>
@@ -38,12 +37,12 @@ namespace SAPEntityFramework.Extensions.Http
         }
 
         /// <summary>
-        /// Manda un post con Json sin respuesta
+        /// Post con Json sin respuesta
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Tipo a devolver</typeparam>
         /// <param name="client">Cliente Http</param>
         /// <param name="requestUri">Ruta</param>
-        /// <param name="body">Objeto</param>
+        /// <param name="body">Objeto a enviar en el body</param>
         /// <param name="cancellationToken">Token de cancelación</param>
         /// <returns></returns>
         /// <exception cref="SLException"></exception>
@@ -69,10 +68,10 @@ namespace SAPEntityFramework.Extensions.Http
         /// <summary>
         /// Devuelve un objeto de una respuesta GET
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="client"></param>
-        /// <param name="requestUri"></param>
-        /// <param name="cancellationToken"></param>
+        /// <typeparam name="T">Tipo a devolver</typeparam>
+        /// <param name="client">Cliente Http</param>
+        /// <param name="requestUri">Ruta</param>
+        /// <param name="cancellationToken">Token de cancelación</param>
         /// <returns></returns>
         /// <exception cref="SLException"></exception>
         public static async Task<T> GetJsonAsync<T>(this HttpClient client, string requestUri, CancellationToken cancellationToken)

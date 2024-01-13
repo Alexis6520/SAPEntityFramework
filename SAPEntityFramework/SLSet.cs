@@ -1,10 +1,16 @@
 ﻿using SAPEntityFramework.Extensions.Http;
+using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace SAPEntityFramework
 {
-    public class SLSet<T> where T : class
+    /// <summary>
+    /// Proporciona acceso a un recurso de Service Layer
+    /// </summary>
+    /// <typeparam name="T">Tipo en el que se basa el recurso</typeparam>
+    public class SLSet<T> : IQueryable<T>
     {
         private readonly SLContext _slContext;
         private readonly string _path;
@@ -13,33 +19,32 @@ namespace SAPEntityFramework
         {
             _slContext = slContext;
             _path = path;
+            Expression = Expression.Constant(this);
+            Provider = new SLQueryProvider(_slContext, path);
         }
 
-        /// <summary>
-        /// Obtiene un elemento por Id
-        /// </summary>
-        /// <param name="key">Id</param>
-        /// <param name="cancellationToken">Token de cancelación</param>
-        /// <returns></returns>
-        public async Task<T> FindAsync(object key, CancellationToken cancellationToken = default)
+        public SLSet(SLQueryProvider queryProvider, Expression predicate)
         {
-            await _slContext.LoginAsync(cancellationToken: cancellationToken);
+            _slContext = queryProvider.Context;
+            _path = queryProvider.Path;
+            Expression = predicate;
+            Provider = queryProvider;
+        }
 
-            var keyProperty = typeof(T).GetProperties()
-                .FirstOrDefault(x => x.GetCustomAttribute<KeyAttribute>() != null);
+        public Type ElementType => typeof(T);
 
-            string filter;
+        public Expression Expression { get; internal set; }
 
-            if (keyProperty.PropertyType == typeof(string))
-            {
-                filter = $"('{key}')";
-            }
-            else
-            {
-                filter = $"({key})";
-            }
+        public IQueryProvider Provider { get; }
 
-            return await _slContext.HttpClient.GetJsonAsync<T>($"{_path}{filter}", cancellationToken);
+        public IEnumerator<T> GetEnumerator()
+        {
+            return Provider.Execute<IEnumerable<T>>(Expression).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

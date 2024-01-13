@@ -1,7 +1,13 @@
 ﻿namespace SAPEntityFramework
 {
+    /// <summary>
+    /// Excepción de SAP Service Layer
+    /// </summary>
     public class SLException : Exception
     {
+        /// <summary>
+        /// Código de error
+        /// </summary>
         public string Code { get; set; }
 
         public SLException(string message, string code = null, Exception innerException = null) : base(message, innerException)

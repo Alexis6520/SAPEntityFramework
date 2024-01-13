@@ -27,6 +27,9 @@ namespace SAPEntityFramework
             InitializeSets();
         }
 
+        /// <summary>
+        /// Cliente Http utilizado por el contexto
+        /// </summary>
         public HttpClient HttpClient { get; private set; }
 
         /// <summary>
@@ -35,7 +38,7 @@ namespace SAPEntityFramework
         /// <param name="forceLogin">Forzar el login aunque no haya expirado la sesión</param>
         /// <param name="cancellationToken">Token de cancelación</param>
         /// <returns></returns>
-        public async Task LoginAsync(bool forceLogin = false, CancellationToken cancellationToken = default)
+        public void Login(bool forceLogin = false, CancellationToken cancellationToken = default)
         {
             if (_session != null)
             {
@@ -53,7 +56,9 @@ namespace SAPEntityFramework
                 _options.Language
             };
 
-            _session = await HttpClient.PostJsonAsync<SLSession>("Login", body, cancellationToken);
+            var task = HttpClient.PostJsonAsync<SLSession>("Login", body, cancellationToken);
+            task.Wait(cancellationToken);
+            _session = task.Result;
             _session.LastLogin = DateTime.Now.AddSeconds(1);
             HttpClient.DefaultRequestHeaders.Remove("B1SESSION");
             HttpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
