@@ -35,25 +35,31 @@ namespace SAPEntityFramework
 
         public TResult Execute<TResult>(Expression expression)
         {
-            Context.Login();
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<T>> ExecuteToListAsync<T>(Expression expression, CancellationToken cancellationToken = default)
+        {
+            await Context.LoginAsync(cancellationToken: cancellationToken);
             var expVisitor = new SLExpressionVisitor();
             expVisitor.Visit(expression);
             var filter = $"$filter={expVisitor.Filter}";
             var uri = $"{Path}?{filter}";
-            var type = typeof(TResult);
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-            {
-                var task = Context.HttpClient.GetJsonAsync<SLResponse<TResult>>(uri, CancellationToken.None);
-                task.Wait();
-                return task.Result.Value;
-            }
-            else
-            {
-                var task = Context.HttpClient.GetJsonAsync<SLResponse<List<TResult>>>(uri, CancellationToken.None);
-                task.Wait();
-                return task.Result.Value.FirstOrDefault();
-            }
+            var response = await Context.HttpClient.GetJsonAsync<SLResponse<List<T>>>(uri, CancellationToken.None);
+            return response.Value;
+        }
+
+        public async Task<T> ExecuteFirstOrDefaultAsync<T>(Expression expression, CancellationToken cancellationToken = default)
+        {
+            await Context.LoginAsync(cancellationToken: cancellationToken);
+            var expVisitor = new SLExpressionVisitor();
+            expVisitor.Visit(expression);
+            var filter = $"$filter={expVisitor.Filter}";
+            var uri = $"{Path}?{filter}";
+
+            var response = await Context.HttpClient.GetJsonAsync<SLResponse<List<T>>>(uri, CancellationToken.None);
+            return response.Value.FirstOrDefault();
         }
     }
 }

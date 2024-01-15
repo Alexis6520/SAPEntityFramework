@@ -38,7 +38,7 @@ namespace SAPEntityFramework
         /// <param name="forceLogin">Forzar el login aunque no haya expirado la sesión</param>
         /// <param name="cancellationToken">Token de cancelación</param>
         /// <returns></returns>
-        public void Login(bool forceLogin = false, CancellationToken cancellationToken = default)
+        public async Task LoginAsync(bool forceLogin = false, CancellationToken cancellationToken = default)
         {
             if (_session != null)
             {
@@ -56,23 +56,20 @@ namespace SAPEntityFramework
                 _options.Language
             };
 
-            var task = HttpClient.PostJsonAsync<SLSession>("Login", body, cancellationToken);
-            task.Wait(cancellationToken);
-            _session = task.Result;
+            _session = await HttpClient.PostJsonAsync<SLSession>("Login", body, cancellationToken);
             _session.LastLogin = DateTime.Now.AddSeconds(1);
             HttpClient.DefaultRequestHeaders.Remove("B1SESSION");
             HttpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
         }
 
-        public void Logout(CancellationToken cancellationToken = default)
+        public async Task LogoutAsync(CancellationToken cancellationToken = default)
         {
             if (_session == null || _session.IsExpired)
             {
                 return;
             }
 
-            var task = HttpClient.PostAsync("Logout", null, cancellationToken: cancellationToken);
-            task.Wait(cancellationToken);
+            await HttpClient.PostAsync("Logout", null, cancellationToken: cancellationToken);
         }
 
         private void InitializeSets()
@@ -89,7 +86,7 @@ namespace SAPEntityFramework
 
         public void Dispose()
         {
-            Logout();
+            LogoutAsync().Wait();
             _options = null;
             _session = null;
             HttpClient.Dispose();

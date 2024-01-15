@@ -1,4 +1,5 @@
 ﻿using SAPEntityFramework;
+using SAPEntityFramework.Extensions.Queryable;
 using System.Diagnostics;
 using Test;
 
@@ -14,8 +15,8 @@ var options = new SLContextOptions()
 using var slContext = new AppSLContext(options);
 var stopWatch = new Stopwatch();
 stopWatch.Start();
-var item = slContext.Items.Where(x => x.ItemCode == "B-T203-T/O").ToList();
-var partner = slContext.BusinessPartners.Where(x => x.CardCode == "00110").First();
+var item = await slContext.Items.Where(x => x.ItemCode == "B-T203-T/O").ToListAsync();
+var partner =await slContext.BusinessPartners.Where(x => x.CardCode == "00110").FirsttOrDefaultAsync();
 stopWatch.Stop();
 Console.Write($"Prueba terminada en {stopWatch.Elapsed.TotalSeconds} segundos");
 Console.ReadLine();
