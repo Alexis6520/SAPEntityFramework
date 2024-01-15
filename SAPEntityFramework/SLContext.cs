@@ -32,6 +32,8 @@ namespace SAPEntityFramework
         /// </summary>
         public HttpClient HttpClient { get; private set; }
 
+        public string CompanyDB { get { return _options.CompanyDB; } set { _options.CompanyDB = value; _session = null; } }
+
         /// <summary>
         /// Inicia sesión en Service Layer
         /// </summary>
