@@ -2,7 +2,7 @@
 {
     public static class QueryableExtensions
     {
-        public static async Task<List<T>> ToSAPListAsync<T>(this IQueryable<T> source, CancellationToken cancellationToken = default)
+        public static async Task<List<T>> GetListAsync<T>(this IQueryable<T> source, CancellationToken cancellationToken = default)
         {
             if (source.Provider is SLQueryProvider slProvider)
             {
@@ -12,7 +12,7 @@
             throw new NotSupportedException("Metodo no soportado para este tipo de proveedor");
         }
 
-        public static async Task<T> FirstSAPAsync<T>(this IQueryable<T> source, CancellationToken cancellationToken = default)
+        public static async Task<T> GetFirstAsync<T>(this IQueryable<T> source, CancellationToken cancellationToken = default)
         {
             if (source.Provider is SLQueryProvider slProvider)
             {
