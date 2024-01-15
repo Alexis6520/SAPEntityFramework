@@ -26,7 +26,7 @@ namespace SAPEntityFramework
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            Filter+=node.Member.Name;
+            Filter += node.Member.Name;
             return node;
         }
 
@@ -34,18 +34,18 @@ namespace SAPEntityFramework
         {
             var type = node.Value.GetType();
 
-            if (type.IsClass && type!=typeof(string))
+            if (type.IsClass && type != typeof(string))
             {
                 return node;
             }
 
             if (node.Value.GetType() == typeof(string))
             {
-                Filter+="'" + node.Value.ToString() + "'";
+                Filter += "'" + node.Value.ToString() + "'";
             }
             else
             {
-                Filter+=$"{node.Value}";
+                Filter += $"{node.Value}";
             }
 
             return node;
@@ -57,6 +57,23 @@ namespace SAPEntityFramework
             {
                 case ExpressionType.Equal:
                     return "eq";
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                    return "and";
+                case ExpressionType.Or:
+                    return "or";
+                case ExpressionType.Not:
+                    return "not";
+                case ExpressionType.LessThanOrEqual:
+                    return "le";
+                case ExpressionType.LessThan:
+                    return "lt";
+                case ExpressionType.GreaterThanOrEqual:
+                    return "ge";
+                case ExpressionType.GreaterThan:
+                    return "gt";
+                case ExpressionType.NotEqual:
+                    return "ne";
                 default:
                     throw new NotSupportedException($"El operador {tipo} no es compatible.");
             }
