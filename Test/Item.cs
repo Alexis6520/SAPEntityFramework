@@ -7,5 +7,6 @@ namespace Test
         [Key]
         public string ItemCode { get; set; }
         public string ItemName { get; set; }
+        public string ItemType { get; set; }
     }
 }
