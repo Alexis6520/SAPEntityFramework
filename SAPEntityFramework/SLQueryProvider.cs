@@ -41,11 +41,7 @@ namespace SAPEntityFramework
         public async Task<List<T>> ExecuteToListAsync<T>(Expression expression, CancellationToken cancellationToken = default)
         {
             await Context.LoginAsync(cancellationToken: cancellationToken);
-            var expVisitor = new SLExpressionVisitor();
-            expVisitor.Visit(expression);
-            var filter = $"$filter={expVisitor.Filter}";
-            var uri = $"{Path}?{filter}";
-
+            var uri = GetUri(expression, typeof(T));
             var response = await Context.HttpClient.GetJsonAsync<SLResponse<List<T>>>(uri, CancellationToken.None);
             return response.Value;
         }
@@ -53,13 +49,30 @@ namespace SAPEntityFramework
         public async Task<T> ExecuteFirstOrDefaultAsync<T>(Expression expression, CancellationToken cancellationToken = default)
         {
             await Context.LoginAsync(cancellationToken: cancellationToken);
+            var uri = GetUri(expression, typeof(T));
+            var response = await Context.HttpClient.GetJsonAsync<SLResponse<List<T>>>(uri, CancellationToken.None);
+            return response.Value.FirstOrDefault();
+        }
+
+        private string GetUri(Expression expression, Type type)
+        {
             var expVisitor = new SLExpressionVisitor();
             expVisitor.Visit(expression);
             var filter = $"$filter={expVisitor.Filter}";
-            var uri = $"{Path}?{filter}";
+            var select = $"$select={Select(type)}";
+            var uri = $"{Path}?{filter}&{select}";
+            return uri;
+        }
 
-            var response = await Context.HttpClient.GetJsonAsync<SLResponse<List<T>>>(uri, CancellationToken.None);
-            return response.Value.FirstOrDefault();
+        private static string Select(Type type)
+        {
+            if (!type.IsClass)
+            {
+                throw new NotSupportedException("Tipo de dato no soportado");
+            }
+
+            var fields = string.Join(',', type.GetProperties().Select(x => x.Name));
+            return fields;
         }
     }
 }
