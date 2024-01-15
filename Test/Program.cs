@@ -15,8 +15,9 @@ var options = new SLContextOptions()
 using var slContext = new AppSLContext(options);
 var stopWatch = new Stopwatch();
 stopWatch.Start();
-var item = await slContext.Items.Where(x => x.ItemCode == "B-T203-T/O").ToListAsync();
-var partner =await slContext.BusinessPartners.Where(x => x.CardCode == "00110").FirsttOrDefaultAsync();
+var item = await slContext.Items.Where(x => x.ItemCode == "TEST_0011").FirsttOrDefaultAsync();
+item.ItemName = "Prueba actualización";
+await slContext.Items.UpdateAsync(item);
 stopWatch.Stop();
 Console.Write($"Prueba terminada en {stopWatch.Elapsed.TotalSeconds} segundos");
 Console.ReadLine();

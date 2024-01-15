@@ -5,6 +5,25 @@ namespace SAPEntityFramework.Extensions.Http
 {
     internal static class HttpClientExtensions
     {
+        public static async Task PatchJsonAsync(this HttpClient client, string requestUri, object body, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                using var content = new StringContent(JsonSerializer.Serialize(body));
+                using var response = await client.PatchAsync(requestUri, content, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var ex = await GetExceptionAsync(response, cancellationToken);
+                    throw ex;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new SLException("No se pudo h¿realizar la petición a Service Layer", null, ex);
+            }
+        }
+
         /// <summary>
         /// Post con Json que devuelve respuesta deserializada
         /// </summary>

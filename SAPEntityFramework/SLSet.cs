@@ -2,7 +2,6 @@
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace SAPEntityFramework
 {
@@ -39,12 +38,34 @@ namespace SAPEntityFramework
 
         public IEnumerator<T> GetEnumerator()
         {
-            return Provider.Execute<IEnumerable<T>>(Expression).GetEnumerator();
+            throw new NotImplementedException();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            throw new NotImplementedException();
+        }
+
+        public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+        {
+            var keyProperty = typeof(T).GetProperties()
+                .Where(x => x.GetCustomAttributes(typeof(KeyAttribute), true).Length > 0)
+                .FirstOrDefault();
+
+            _ = keyProperty ?? throw new ArgumentException($"La clase {typeof(T).Name} no tiene definida una propiedad como llave");
+            var uri = $"{_path}";
+            object value = keyProperty.GetValue(entity) ?? throw new Exception("El valor de la llave no puede ser null");
+
+            if (keyProperty.PropertyType == typeof(string))
+            {
+                uri += $"('{value}')";
+            }
+            else
+            {
+                uri += $"({value})";
+            }
+
+            await _slContext.HttpClient.PatchJsonAsync(uri, entity, cancellationToken);
         }
     }
 }
