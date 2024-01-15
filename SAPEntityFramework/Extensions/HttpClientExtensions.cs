@@ -18,9 +18,9 @@ namespace SAPEntityFramework.Extensions.Http
                     throw ex;
                 }
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                throw new SLException("No se pudo h¿realizar la petición a Service Layer", null, ex);
+                throw new SLException("No se pudo realizar la petición a Service Layer", null, ex);
             }
         }
 
@@ -49,9 +49,9 @@ namespace SAPEntityFramework.Extensions.Http
 
                 return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                throw new SLException("No se pudo h¿realizar la petición a Service Layer", null, ex);
+                throw new SLException("No se pudo realizar la petición a Service Layer", null, ex);
             }
         }
 
@@ -78,7 +78,7 @@ namespace SAPEntityFramework.Extensions.Http
                     throw ex;
                 }
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
                 throw new SLException("Error al realizar la petición", null, ex);
             }
@@ -107,7 +107,7 @@ namespace SAPEntityFramework.Extensions.Http
 
                 return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
                 throw new SLException("Error al realizar la petición", null, ex);
             }

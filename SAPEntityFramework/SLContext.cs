@@ -50,10 +50,10 @@ namespace SAPEntityFramework
 
             var body = new
             {
-                _options.CompanyDB,
-                _options.UserName,
-                _options.Password,
-                _options.Language
+                CompanyDB = _options.CompanyDB ?? throw new SLException("No se ha proporcionado una base de datos"),
+                UserName = _options.UserName ?? throw new SLException("No se proporcionó un usuario"),
+                Password = _options.Password ?? throw new SLException("No se proporcionó una contraseña"),
+                Language = _options.Language ?? 25
             };
 
             _session = await HttpClient.PostJsonAsync<SLSession>("Login", body, cancellationToken);
