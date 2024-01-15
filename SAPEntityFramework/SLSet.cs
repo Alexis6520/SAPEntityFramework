@@ -48,23 +48,31 @@ namespace SAPEntityFramework
 
         public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
-            var keyProperty = typeof(T).GetProperties()
-                .Where(x => x.GetCustomAttributes(typeof(KeyAttribute), true).Length > 0)
-                .FirstOrDefault();
+            var keyProperties = typeof(T).GetProperties()
+                .Where(x => x.GetCustomAttributes(typeof(KeyAttribute), true).Length > 0);
 
-            _ = keyProperty ?? throw new ArgumentException($"La clase {typeof(T).Name} no tiene definida una propiedad como llave");
-            var uri = $"{_path}";
-            object value = keyProperty.GetValue(entity) ?? throw new Exception("El valor de la llave no puede ser null");
-
-            if (keyProperty.PropertyType == typeof(string))
+            if (!keyProperties.Any())
             {
-                uri += $"('{value}')";
-            }
-            else
-            {
-                uri += $"({value})";
+                throw new ArgumentException($"La clase {typeof(T).Name} no tiene definida una propiedad como llave");
             }
 
+            var values= new List<string>();
+
+            foreach ( var key in keyProperties )
+            {
+                object value = key.GetValue(entity) ?? throw new Exception("El valor de la llave no puede ser null");
+
+                if (key.PropertyType == typeof(string))
+                {
+                    values.Add($"{key.Name}='{value}'");
+                }
+                else
+                {
+                    values.Add($"{key.Name}={value}");
+                }
+            }
+
+            var uri = $"{_path}({string.Join(',', values)})";
             await _slContext.HttpClient.PatchJsonAsync(uri, entity, cancellationToken);
         }
     }

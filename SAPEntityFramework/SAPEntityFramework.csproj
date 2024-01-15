@@ -4,6 +4,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>SAPEntityFramework</Title>
+    <Authors>Alexis6520</Authors>
+    <Company>Alexis6520</Company>
+    <Description>Marco de trabajo para conectar con SAP Service Layer</Description>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
 </Project>

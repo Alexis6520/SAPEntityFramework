@@ -8,5 +8,6 @@ namespace Test
 
         public SLSet<Item> Items { get; set; }
         public SLSet<BusinessPartner> BusinessPartners { get; set; }
+        public SLSet<AlternateCatNum> AlternateCatNum { get; set; }
     }
 }
