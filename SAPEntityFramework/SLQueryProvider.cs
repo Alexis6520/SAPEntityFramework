@@ -71,7 +71,10 @@ namespace SAPEntityFramework
                 throw new NotSupportedException("Tipo de dato no soportado");
             }
 
-            var fields = string.Join(',', type.GetProperties().Select(x => x.Name));
+            var names = type.GetProperties()
+                .Select(x => $"{char.ToUpper(x.Name[0])}{x.Name[1..]}");
+
+            var fields = string.Join(',', names);
             return fields;
         }
     }

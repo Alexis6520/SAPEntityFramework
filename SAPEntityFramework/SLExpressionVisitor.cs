@@ -26,7 +26,7 @@ namespace SAPEntityFramework
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            Filter += node.Member.Name;
+            Filter += $"{char.ToUpper(node.Member.Name[0])}{node.Member.Name[1..]}";
             return node;
         }
 

@@ -56,19 +56,20 @@ namespace SAPEntityFramework
                 throw new ArgumentException($"La clase {typeof(T).Name} no tiene definida una propiedad como llave");
             }
 
-            var values= new List<string>();
+            var values = new List<string>();
 
-            foreach ( var key in keyProperties )
+            foreach (var key in keyProperties)
             {
                 object value = key.GetValue(entity) ?? throw new Exception("El valor de la llave no puede ser null");
+                var keyName = $"{char.ToUpper(key.Name[0])}{key.Name[1..]}";
 
                 if (key.PropertyType == typeof(string))
                 {
-                    values.Add($"{key.Name}='{value}'");
+                    values.Add($"{keyName}='{value}'");
                 }
                 else
                 {
-                    values.Add($"{key.Name}={value}");
+                    values.Add($"{keyName}={value}");
                 }
             }
 
