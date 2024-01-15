@@ -1,5 +1,5 @@
 ﻿using SAPEntityFramework;
-using SAPEntityFramework.Extensions.Queryable;
+using SAPEntityFramework.Extensions;
 using System.Diagnostics;
 using Test;
 
@@ -15,7 +15,7 @@ var options = new SLContextOptions()
 using var slContext = new AppSLContext(options);
 var stopWatch = new Stopwatch();
 stopWatch.Start();
-var item = await slContext.Items.Where(x => x.ItemCode == "TEST_0011").FirsttOrDefaultAsync();
+var item = await slContext.Items.Where(x => x.ItemCode == "TEST_0011").FirstOrDefaultAsync();
 item.ItemName = "Prueba actualización";
 await slContext.Items.UpdateAsync(item);
 stopWatch.Stop();

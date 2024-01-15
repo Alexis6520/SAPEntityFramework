@@ -1,4 +1,4 @@
-﻿namespace SAPEntityFramework.Extensions.Queryable
+﻿namespace SAPEntityFramework.Extensions
 {
     public static class QueryableExtensions
     {
@@ -12,7 +12,7 @@
             throw new NotSupportedException("Metodo no soportado para este tipo de proveedor");
         }
 
-        public static async Task<T> FirsttOrDefaultAsync<T>(this IQueryable<T> source, CancellationToken cancellationToken = default)
+        public static async Task<T> FirstOrDefaultAsync<T>(this IQueryable<T> source, CancellationToken cancellationToken = default)
         {
             if (source.Provider is SLQueryProvider slProvider)
             {
