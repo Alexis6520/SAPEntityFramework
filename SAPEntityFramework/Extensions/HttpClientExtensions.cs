@@ -47,7 +47,7 @@ namespace SAPEntityFramework.Extensions.Http
                     throw ex;
                 }
 
-                return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+                return await response.Content.ReadFromJsonAsync<T>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, cancellationToken: cancellationToken);
             }
             catch (Exception ex)
             {
@@ -105,7 +105,7 @@ namespace SAPEntityFramework.Extensions.Http
                     throw ex;
                 }
 
-                return await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+                return await response.Content.ReadFromJsonAsync<T>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, cancellationToken: cancellationToken);
             }
             catch (Exception ex)
             {
