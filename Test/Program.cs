@@ -15,8 +15,6 @@ var options = new SLContextOptions()
 using var slContext = new AppSLContext(options);
 var stopWatch = new Stopwatch();
 stopWatch.Start();
-string a = "P0000000010";
-var b = new BusinessPartner { CardCode = "P0000000010" };
-var item = await slContext.BusinessPartners.Where(x => x.CardCode == "P0000000010").GetFirstAsync();
+var a = await slContext.PriceLists.Where(x => x.Active == "tYES").GetListAsync();
 stopWatch.Stop();
 Console.Write($"Prueba terminada en {stopWatch.Elapsed.TotalSeconds} segundos");

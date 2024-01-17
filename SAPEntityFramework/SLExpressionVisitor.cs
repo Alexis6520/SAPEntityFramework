@@ -50,7 +50,7 @@ namespace SAPEntityFramework
                 return node;
             }
 
-            Filter += GetFormattedString(node);
+            Filter += GetFormattedString(node.Value);
             return node;
         }
 
