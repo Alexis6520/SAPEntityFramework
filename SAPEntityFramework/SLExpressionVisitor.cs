@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using System.Text;
+using System.Reflection;
 
 namespace SAPEntityFramework
 {
@@ -26,7 +26,18 @@ namespace SAPEntityFramework
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            Filter += $"{char.ToUpper(node.Member.Name[0])}{node.Member.Name[1..]}";
+            if (node.Expression.NodeType == ExpressionType.MemberAccess || node.Expression.NodeType == ExpressionType.Constant)
+            {
+                var objectMember = Expression.Convert(node, typeof(object));
+                var getter = Expression.Lambda<Func<object>>(objectMember).Compile();
+                var value = getter();
+                Filter += GetFormattedString(value);
+            }
+            else
+            {
+                Filter += $"{char.ToUpper(node.Member.Name[0])}{node.Member.Name[1..]}";
+            }
+
             return node;
         }
 
@@ -39,16 +50,20 @@ namespace SAPEntityFramework
                 return node;
             }
 
-            if (node.Value.GetType() == typeof(string))
+            Filter += GetFormattedString(node);
+            return node;
+        }
+
+        private static string GetFormattedString(object obj)
+        {
+            if (obj.GetType() == typeof(string))
             {
-                Filter += "'" + node.Value.ToString() + "'";
+                return $"'{obj}'";
             }
             else
             {
-                Filter += $"{node.Value}";
+                return $"{obj}";
             }
-
-            return node;
         }
 
         private static string GetOperator(ExpressionType tipo)
@@ -75,7 +90,7 @@ namespace SAPEntityFramework
                 case ExpressionType.NotEqual:
                     return "ne";
                 default:
-                    throw new NotSupportedException($"El operador {tipo} no es compatible.");
+                    throw new NotSupportedException($"El operador {tipo} no es compatible con Service Layer");
             }
         }
     }
