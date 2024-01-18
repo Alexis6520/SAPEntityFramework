@@ -60,6 +60,13 @@ namespace SAPEntityFramework
             await _slContext.HttpClient.DeleteAsync(uri, cancellationToken);
         }
 
+        public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
+        {
+#pragma warning disable IDE0059 // Asignación innecesaria de un valor
+            entity = await _slContext.HttpClient.PostJsonAsync<T>(_path, entity, cancellationToken);
+#pragma warning restore IDE0059 // Asignación innecesaria de un valor
+        }
+
         private static List<string> GetKeyValue(T entity)
         {
             var keyProperties = typeof(T).GetProperties()
