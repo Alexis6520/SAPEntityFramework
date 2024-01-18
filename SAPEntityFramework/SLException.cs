@@ -1,4 +1,4 @@
-﻿namespace SAPEntityFramework
+﻿namespace SAPSLFramework
 {
     /// <summary>
     /// Excepción de SAP Service Layer

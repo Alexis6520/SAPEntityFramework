@@ -1,4 +1,4 @@
-﻿namespace SAPEntityFramework
+﻿namespace SAPSLFramework
 {
     internal class SLResponse<T>
     {

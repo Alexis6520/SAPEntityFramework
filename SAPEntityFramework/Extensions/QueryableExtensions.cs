@@ -1,4 +1,4 @@
-﻿namespace SAPEntityFramework.Extensions
+﻿namespace SAPSLFramework.Extensions
 {
     public static class QueryableExtensions
     {

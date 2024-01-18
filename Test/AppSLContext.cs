@@ -1,4 +1,4 @@
-﻿using SAPEntityFramework;
+﻿using SAPSLFramework;
 
 namespace Test
 {

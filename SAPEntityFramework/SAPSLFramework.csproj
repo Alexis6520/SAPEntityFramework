@@ -10,15 +10,10 @@
     <Company>Alexis6520</Company>
     <Description>Alternativa ligera a OData porque esa madre luego fastidia</Description>
     <Version>1.0.0</Version>
-    <ApplicationIcon>60180792.ico</ApplicationIcon>
     <Copyright>Copyright (c) Alexis6520 2024</Copyright>
     <PackageIcon>60180792.jpeg</PackageIcon>
     <PackageTags>SAP,Service Layer</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="60180792.ico" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\..\..\Downloads\60180792.jpeg">

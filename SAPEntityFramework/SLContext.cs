@@ -1,6 +1,6 @@
-﻿using SAPEntityFramework.Extensions.Http;
+﻿using SAPSLFramework.Extensions.Http;
 
-namespace SAPEntityFramework
+namespace SAPSLFramework
 {
     /// <summary>
     /// Clase base para crear un contexto de SAP Service Layer. No admite multi-hilos.

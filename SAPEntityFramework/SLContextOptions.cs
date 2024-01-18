@@ -1,4 +1,4 @@
-﻿namespace SAPEntityFramework
+﻿namespace SAPSLFramework
 {
     /// <summary>
     /// Opciones de configuración de service layer

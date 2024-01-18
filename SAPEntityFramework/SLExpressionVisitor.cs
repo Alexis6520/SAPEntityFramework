@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 
-namespace SAPEntityFramework
+namespace SAPSLFramework
 {
     internal class SLExpressionVisitor : ExpressionVisitor
     {
@@ -68,30 +68,19 @@ namespace SAPEntityFramework
 
         private static string GetOperator(ExpressionType tipo)
         {
-            switch (tipo)
+            return tipo switch
             {
-                case ExpressionType.Equal:
-                    return "eq";
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                    return "and";
-                case ExpressionType.Or:
-                    return "or";
-                case ExpressionType.Not:
-                    return "not";
-                case ExpressionType.LessThanOrEqual:
-                    return "le";
-                case ExpressionType.LessThan:
-                    return "lt";
-                case ExpressionType.GreaterThanOrEqual:
-                    return "ge";
-                case ExpressionType.GreaterThan:
-                    return "gt";
-                case ExpressionType.NotEqual:
-                    return "ne";
-                default:
-                    throw new NotSupportedException($"El operador {tipo} no es compatible con Service Layer");
-            }
+                ExpressionType.Equal => "eq",
+                ExpressionType.And or ExpressionType.AndAlso => "and",
+                ExpressionType.Or => "or",
+                ExpressionType.Not => "not",
+                ExpressionType.LessThanOrEqual => "le",
+                ExpressionType.LessThan => "lt",
+                ExpressionType.GreaterThanOrEqual => "ge",
+                ExpressionType.GreaterThan => "gt",
+                ExpressionType.NotEqual => "ne",
+                _ => throw new NotSupportedException($"El operador {tipo} no es compatible con Service Layer"),
+            };
         }
     }
 }

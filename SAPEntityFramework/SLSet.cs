@@ -1,9 +1,9 @@
-﻿using SAPEntityFramework.Extensions.Http;
+﻿using SAPSLFramework.Extensions.Http;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 
-namespace SAPEntityFramework
+namespace SAPSLFramework
 {
     /// <summary>
     /// Proporciona acceso a un recurso de Service Layer

@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace SAPEntityFramework.Extensions.Http
+namespace SAPSLFramework.Extensions.Http
 {
     internal static class HttpClientExtensions
     {

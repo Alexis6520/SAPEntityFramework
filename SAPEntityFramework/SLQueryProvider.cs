@@ -1,11 +1,7 @@
-﻿using SAPEntityFramework.Extensions.Http;
-using System.ComponentModel.DataAnnotations;
+﻿using SAPSLFramework.Extensions.Http;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Threading;
-using System.Xml.Xsl;
 
-namespace SAPEntityFramework
+namespace SAPSLFramework
 {
     public class SLQueryProvider : IQueryProvider
     {
