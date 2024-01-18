@@ -48,6 +48,20 @@ namespace SAPEntityFramework
 
         public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
+            var values = GetKeyValue(entity);
+            var uri = $"{_path}({string.Join(',', values)})";
+            await _slContext.HttpClient.PatchJsonAsync(uri, entity, cancellationToken);
+        }
+
+        public async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
+        {
+            var values = GetKeyValue(entity);
+            var uri = $"{_path}({string.Join(',', values)})";
+            await _slContext.HttpClient.DeleteAsync(uri, cancellationToken);
+        }
+
+        private static List<string> GetKeyValue(T entity)
+        {
             var keyProperties = typeof(T).GetProperties()
                 .Where(x => x.GetCustomAttributes(typeof(KeyAttribute), true).Length > 0);
 
@@ -73,8 +87,7 @@ namespace SAPEntityFramework
                 }
             }
 
-            var uri = $"{_path}({string.Join(',', values)})";
-            await _slContext.HttpClient.PatchJsonAsync(uri, entity, cancellationToken);
+            return values;
         }
     }
 }

@@ -15,6 +15,7 @@ var options = new SLContextOptions()
 using var slContext = new AppSLContext(options);
 var stopWatch = new Stopwatch();
 stopWatch.Start();
-var a = await slContext.PriceLists.Where(x => x.Active == "tYES").GetListAsync();
+var a = await slContext.Items.Where(x => x.ItemCode == "TEST_0011").GetFirstAsync();
+await slContext.Items.DeleteAsync(a);
 stopWatch.Stop();
 Console.Write($"Prueba terminada en {stopWatch.Elapsed.TotalSeconds} segundos");

@@ -113,6 +113,32 @@ namespace SAPEntityFramework.Extensions.Http
             }
         }
 
+        /// <summary>
+        /// DELETE
+        /// </summary>
+        /// <param name="client">Cliente Http</param>
+        /// <param name="requestUri">Ruta</param>
+        /// <param name="cancellationToken">Token de cancelación</param>
+        /// <returns></returns>
+        /// <exception cref="SLException"></exception>
+        public static async Task DeleteAsync(this HttpClient client, string requestUri, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var response = await client.DeleteAsync(requestUri, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var ex = await GetExceptionAsync(response, cancellationToken);
+                    throw ex;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new SLException("Error al realizar la petición", null, ex);
+            }
+        }
+
         private static async Task<SLException> GetExceptionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             try
