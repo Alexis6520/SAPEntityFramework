@@ -9,13 +9,13 @@ var options = new SLContextOptions()
     UserName = "manager",
     Password = "nueva2017",
     Language = 25,
-    CompanyDB = "SAP_PRUEBAS"
+    CompanyDB = "SAP_PRUEBAS_48"
 };
 
 using var slContext = new AppSLContext(options);
 var stopWatch = new Stopwatch();
 stopWatch.Start();
-var a = await slContext.Items.Where(x => x.ItemCode == "TEST_0011").GetFirstAsync();
+var a = new Item { ItemCode = "Prueba1233" };
 await slContext.Items.DeleteAsync(a);
 stopWatch.Stop();
 Console.Write($"Prueba terminada en {stopWatch.Elapsed.TotalSeconds} segundos");
