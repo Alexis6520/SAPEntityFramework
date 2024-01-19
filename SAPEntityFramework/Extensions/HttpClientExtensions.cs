@@ -121,7 +121,7 @@ namespace SAPSLFramework.Extensions.Http
         /// <param name="cancellationToken">Token de cancelación</param>
         /// <returns></returns>
         /// <exception cref="SLException"></exception>
-        public static async Task DeleteAsync(this HttpClient client, string requestUri, CancellationToken cancellationToken)
+        public static async Task SendDeleteAsync(this HttpClient client, string requestUri, CancellationToken cancellationToken)
         {
             try
             {

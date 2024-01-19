@@ -59,7 +59,7 @@ namespace SAPSLFramework
             await _slContext.LoginAsync();
             var values = GetKeyValue(entity);
             var uri = $"{_path}({string.Join(',', values)})";
-            await _slContext.HttpClient.DeleteAsync(uri, cancellationToken);
+            await _slContext.HttpClient.SendDeleteAsync(uri, cancellationToken);
         }
 
         public async Task AddAsync(T entity, CancellationToken cancellationToken = default)

@@ -15,7 +15,7 @@ var options = new SLContextOptions()
 using var slContext = new AppSLContext(options);
 var stopWatch = new Stopwatch();
 stopWatch.Start();
-var a = new Item { ItemCode = "Prueba1233" };
+var a = new Item { ItemCode = "prueba1233" };
 await slContext.Items.DeleteAsync(a);
 stopWatch.Stop();
 Console.Write($"Prueba terminada en {stopWatch.Elapsed.TotalSeconds} segundos");
