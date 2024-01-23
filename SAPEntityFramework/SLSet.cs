@@ -48,15 +48,23 @@ namespace SAPSLFramework
 
         public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await _slContext.LoginAsync();
+            await _slContext.LoginAsync(cancellationToken: cancellationToken);
             var values = GetKeyValue(entity);
             var uri = $"{_path}({string.Join(',', values)})";
             await _slContext.HttpClient.PatchJsonAsync(uri, entity, cancellationToken);
         }
 
+        public async Task UpdateAsync(T oldEntity, T newEntity, CancellationToken cancellationToken = default)
+        {
+            await _slContext.LoginAsync(cancellationToken: cancellationToken);
+            var values = GetKeyValue(oldEntity);
+            var uri = $"{_path}({string.Join(',', values)})";
+            await _slContext.HttpClient.PatchJsonAsync(uri, newEntity, cancellationToken);
+        }
+
         public async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await _slContext.LoginAsync();
+            await _slContext.LoginAsync(cancellationToken: cancellationToken);
             var values = GetKeyValue(entity);
             var uri = $"{_path}({string.Join(',', values)})";
             await _slContext.HttpClient.SendDeleteAsync(uri, cancellationToken);
@@ -64,7 +72,7 @@ namespace SAPSLFramework
 
         public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await _slContext.LoginAsync();
+            await _slContext.LoginAsync(cancellationToken: cancellationToken);
 
 #pragma warning disable IDE0059 // Asignación innecesaria de un valor
             entity = await _slContext.HttpClient.PostJsonAsync<T>(_path, entity, cancellationToken);
