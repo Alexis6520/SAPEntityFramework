@@ -24,6 +24,7 @@ namespace SAPSLFramework
                 BaseAddress = new Uri(_options.Url)
             };
 
+            HttpClient.DefaultRequestHeaders.Add("B1S-PageSize", "0");
             InitializeSets();
         }
 
