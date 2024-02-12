@@ -3,12 +3,13 @@
 namespace SAPSLFramework
 {
     /// <summary>
-    /// Clase base para crear un contexto de SAP Service Layer. No admite multi-hilos.
+    /// Clase base para crear un contexto de SAP Service Layer.
     /// </summary>
     public abstract class SLContext : IDisposable
     {
         private SLContextOptions _options;
         private SLSession _session;
+        private readonly HttpClient _httpClient;
 
         public SLContext(SLContextOptions options)
         {
@@ -19,19 +20,16 @@ namespace SAPSLFramework
                 ServerCertificateCustomValidationCallback = (a, b, c, d) => { return true; }
             };
 
-            HttpClient = new HttpClient(handler)
+            _httpClient = new HttpClient(handler)
             {
                 BaseAddress = new Uri(_options.Url)
             };
 
-            HttpClient.DefaultRequestHeaders.Add("B1S-PageSize", "0");
+            _httpClient.DefaultRequestHeaders.Add("B1S-PageSize", "0");
             InitializeSets();
         }
 
-        /// <summary>
-        /// Cliente Http utilizado por el contexto
-        /// </summary>
-        public HttpClient HttpClient { get; private set; }
+        internal HttpClient HttpClient { get { return _httpClient; } }
 
         /// <summary>
         /// Inicia sesión en Service Layer
@@ -57,10 +55,10 @@ namespace SAPSLFramework
                 Language = _options.Language ?? 25
             };
 
-            _session = await HttpClient.PostJsonAsync<SLSession>("Login", body, cancellationToken);
+            _session = await _httpClient.PostJsonAsync<SLSession>("Login", body, cancellationToken);
             _session.LastLogin = DateTime.Now.AddSeconds(1);
-            HttpClient.DefaultRequestHeaders.Remove("B1SESSION");
-            HttpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
+            _httpClient.DefaultRequestHeaders.Remove("B1SESSION");
+            _httpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
         }
 
         public async Task LogoutAsync(CancellationToken cancellationToken = default)
@@ -70,7 +68,7 @@ namespace SAPSLFramework
                 return;
             }
 
-            await HttpClient.PostAsync("Logout", null, cancellationToken: cancellationToken);
+            await _httpClient.PostAsync("Logout", null, cancellationToken: cancellationToken);
         }
 
         private void InitializeSets()
@@ -87,10 +85,14 @@ namespace SAPSLFramework
 
         public void Dispose()
         {
-            LogoutAsync().Wait();
+            if (_session != null && !_session.IsExpired)
+            {
+                LogoutAsync().Wait();
+            }
+
             _options = null;
             _session = null;
-            HttpClient.Dispose();
+            _httpClient.Dispose();
             GC.SuppressFinalize(this);
         }
     }

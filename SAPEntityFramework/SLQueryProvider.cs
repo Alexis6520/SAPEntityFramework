@@ -54,9 +54,14 @@ namespace SAPSLFramework
         {
             var expVisitor = new SLExpressionVisitor();
             expVisitor.Visit(expression);
-            var filter = $"$filter={expVisitor.Filter}";
-            var select = $"$select={Select(type)}";
-            var uri = $"{Path}?{filter}&{select}";
+
+            var queries = new List<string>
+            {
+                string.IsNullOrEmpty(expVisitor.Filter) ? null : $"$filter={expVisitor.Filter}",
+                $"$select={Select(type)}"
+            };
+
+            var uri = $"{Path}?{string.Join('&', queries.Where(x => x != null))}";
             return uri;
         }
 

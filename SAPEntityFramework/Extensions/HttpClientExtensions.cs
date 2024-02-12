@@ -5,6 +5,16 @@ namespace SAPSLFramework.Extensions.Http
 {
     internal static class HttpClientExtensions
     {
+
+        /// <summary>
+        /// Patch con Json
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="requestUri"></param>
+        /// <param name="body"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="SLException"></exception>
         public static async Task PatchJsonAsync(this HttpClient client, string requestUri, object body, CancellationToken cancellationToken = default)
         {
             try
@@ -17,6 +27,10 @@ namespace SAPSLFramework.Extensions.Http
                     var ex = await GetExceptionAsync(response, cancellationToken);
                     throw ex;
                 }
+            }
+            catch (SLException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -49,6 +63,10 @@ namespace SAPSLFramework.Extensions.Http
 
                 return await response.Content.ReadFromJsonAsync<T>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, cancellationToken: cancellationToken);
             }
+            catch (SLException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new SLException("No se pudo realizar la petición a Service Layer", null, ex);
@@ -77,6 +95,10 @@ namespace SAPSLFramework.Extensions.Http
                     var ex = await GetExceptionAsync(response, cancellationToken);
                     throw ex;
                 }
+            }
+            catch (SLException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -107,6 +129,10 @@ namespace SAPSLFramework.Extensions.Http
 
                 return await response.Content.ReadFromJsonAsync<T>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, cancellationToken: cancellationToken);
             }
+            catch (SLException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new SLException("Error al realizar la petición", null, ex);
@@ -132,6 +158,10 @@ namespace SAPSLFramework.Extensions.Http
                     var ex = await GetExceptionAsync(response, cancellationToken);
                     throw ex;
                 }
+            }
+            catch (SLException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

@@ -54,14 +54,6 @@ namespace SAPSLFramework
             await _slContext.HttpClient.PatchJsonAsync(uri, entity, cancellationToken);
         }
 
-        public async Task UpdateAsync(T oldEntity, T newEntity, CancellationToken cancellationToken = default)
-        {
-            await _slContext.LoginAsync(cancellationToken: cancellationToken);
-            var values = GetKeyValue(oldEntity);
-            var uri = $"{_path}({string.Join(',', values)})";
-            await _slContext.HttpClient.PatchJsonAsync(uri, newEntity, cancellationToken);
-        }
-
         public async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
         {
             await _slContext.LoginAsync(cancellationToken: cancellationToken);
