@@ -150,12 +150,24 @@ namespace SAPSLFramework
             }
         }
 
+        private void ClearSets()
+        {
+            var setsProps = GetType().GetProperties()
+                .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(SLSet<>));
+
+            foreach (var set in setsProps)
+            {
+                set.SetValue(this, null);
+            }
+        }
+
         public void Dispose()
         {
             LogoutAsync().Wait();
             _options = null;
             _session = null;
             _httpClient.Dispose();
+            ClearSets();
             GC.SuppressFinalize(this);
         }
     }

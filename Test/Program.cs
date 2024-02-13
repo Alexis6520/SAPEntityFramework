@@ -11,5 +11,6 @@ var options = new SLContextOptions()
 };
 
 using var context = new AppSLContext(options);
-var item = await context.Items.Where(x => x.ItemCode == "AB-0464").ToListAsync();
+var items = await context.Items.Where(x => x.ItemCode == "AB-0464").ToListAsync();
+var item = await context.Items.Where(x => x.ItemCode == "AB-0464").FirstAsync();
 Console.WriteLine("");
