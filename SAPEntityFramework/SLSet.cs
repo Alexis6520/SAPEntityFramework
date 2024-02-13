@@ -76,6 +76,21 @@ namespace SAPSLFramework
             return new SLSet<T>(_context, Resource, predicate);
         }
 
+        /// <summary>
+        /// Ejecuta una acción para el elemento de este recurso
+        /// </summary>
+        /// <param name="entity">Elemento del recurso</param>
+        /// <param name="actionName">Acción a ejecutar</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task ExecuteActionAsync(T entity, string actionName, CancellationToken cancellationToken = default)
+        {
+            var values = GetKeyValue(entity);
+            var uri = $"{Resource}({string.Join(',', values)})/{actionName}";
+            using var request = new HttpRequestMessage(HttpMethod.Post, uri);
+            await _context.ExecuteAsync(request, cancellationToken);
+        }
+
         private static List<string> GetKeyValue(T entity)
         {
             var keyProperties = typeof(T).GetProperties()

@@ -161,6 +161,35 @@ namespace SAPSLFramework
             }
         }
 
+        /// <summary>
+        /// Ejecuta una acción global
+        /// </summary>
+        /// <param name="actionName">Nombre de la acción</param>
+        /// <param name="content">Body</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task ExecuteActionAsync(string actionName, object content = null, CancellationToken cancellationToken = default)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, actionName);
+            request.Content = content == null ? null : new StringContent(JsonSerializer.Serialize(content));
+            await ExecuteAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Ejecuta una acción global y devuelve el tipo especificado
+        /// </summary>
+        /// <param name="actionName">Nombre de la acción</param>
+        /// <param name="content">Body</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<T> ExecuteActionAsync<T>(string actionName, object content = null, CancellationToken cancellationToken = default)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, actionName);
+            request.Content = content == null ? null : new StringContent(JsonSerializer.Serialize(content));
+            var response = await ExecuteAsync<SLResponse<T>>(request, cancellationToken);
+            return response.Value;
+        }
+
         private void InitializeSets()
         {
             var setsProps = GetType().GetProperties()

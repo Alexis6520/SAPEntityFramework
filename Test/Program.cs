@@ -37,5 +37,7 @@ await context.Items.AddAsync(item);
 var requestedItem = await context.Items.Where(x => x.ItemCode == item.ItemCode).FirstAsync();
 requestedItem.BarCode = "SeCambio";
 await context.Items.UpdateAsync(requestedItem);
+await context.Items.ExecuteActionAsync(item, "Cancel");
 await context.Items.DeleteAsync(requestedItem);
+var a = await context.ExecuteActionAsync<List<Activity>>("ActivitiesService_GetActivityList");
 Console.WriteLine();
