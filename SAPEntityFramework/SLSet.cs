@@ -22,6 +22,11 @@ namespace SAPSLFramework
             _context = sl_context;
         }
 
+        public SLSet(SLContext sl_context, string resource, Expression defaultExpression, Expression selectExpression) : base(sl_context, resource, defaultExpression, selectExpression)
+        {
+            _context = sl_context;
+        }
+
         /// <summary>
         /// Agrega un nuevo elemento al recurso
         /// </summary>
@@ -74,6 +79,11 @@ namespace SAPSLFramework
         public override SLQuery<T> Where(Expression<Func<T, bool>> predicate)
         {
             return new SLSet<T>(_context, Resource, predicate);
+        }
+
+        public override SLQuery<I> Select<I>(Expression<Func<T, I>> selector)
+        {
+            return new SLSet<I>(_context, Resource, _queryExpression, selector);
         }
 
         /// <summary>
