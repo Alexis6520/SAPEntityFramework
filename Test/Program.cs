@@ -42,4 +42,5 @@ await context.Items.DeleteAsync(requestedItem);
 var a = await context.ExecuteActionAsync<List<Activity>>("ActivitiesService_GetActivityList");
 var startsWithItems = await context.Items.Where(x => x.ItemCode.StartsWith("PRUEBA")).ToListAsync();
 var endsWithItems = await context.Items.Where(x => x.ItemName.EndsWith("layer")).ToListAsync();
+var containsItems = await context.Items.Where(x => x.ItemName.Contains("ba")).FirstAsync();
 Console.WriteLine();

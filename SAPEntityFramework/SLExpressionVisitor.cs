@@ -4,7 +4,7 @@ namespace SAPSLFramework
 {
     internal class SLExpressionVisitor : ExpressionVisitor
     {
-        private readonly string[] _queryFunctions = new string[] { "startswith", "endswith", "contains", "substringof" };
+        private readonly string[] _queryFunctions = new string[] { "startswith", "endswith", "contains" };
 
         public SLExpressionVisitor()
         {
