@@ -1,25 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>SAPSLFramework</Title>
-    <Authors>Alexis6520</Authors>
-    <Company>Alexis6520</Company>
-    <Description>Alternativa ligera a OData porque esa madre luego fastidia</Description>
-    <Version>1.0.5</Version>
-    <Copyright>Copyright (c) Alexis6520 2024</Copyright>
-    <PackageIcon>60180792.jpeg</PackageIcon>
-    <PackageTags>SAP,Service Layer</PackageTags>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>SAPSLFramework</Title>
+		<Authors>Alexis6520</Authors>
+		<Company>Alexis6520</Company>
+		<Description>Alternativa ligera a OData porque esa madre luego fastidia</Description>
+		<Version>1.0.5</Version>
+		<Copyright>Copyright (c) Alexis6520 2024</Copyright>
+		<PackageIcon>60180792.jpeg</PackageIcon>
+		<PackageTags>SAP,Service Layer</PackageTags>
+		<NoWarn>IDE0059</NoWarn>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\..\..\..\Downloads\60180792.jpeg">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+	  <None Update="60180792.jpeg">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 </Project>

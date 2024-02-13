@@ -1,5 +1,4 @@
 ﻿using SAPSLFramework;
-using SAPSLFramework.Extensions;
 using Test;
 
 var options = new SLContextOptions()
@@ -11,6 +10,6 @@ var options = new SLContextOptions()
     CompanyDB = "SAP_PRUEBAS_48"
 };
 
-using var slContext = new AppSLContext(options);
-var item =await slContext.Items.GetFirstAsync();
+using var context = new AppSLContext(options);
+var item = await context.Items.Where(x => x.ItemCode == "AB-0464").ToListAsync();
 Console.WriteLine("");

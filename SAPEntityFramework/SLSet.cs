@@ -1,7 +1,6 @@
-﻿using SAPSLFramework.Extensions.Http;
-using System.Collections;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace SAPSLFramework
 {
@@ -9,66 +8,72 @@ namespace SAPSLFramework
     /// Proporciona acceso a un recurso de Service Layer
     /// </summary>
     /// <typeparam name="T">Tipo en el que se basa el recurso</typeparam>
-    public class SLSet<T> : IQueryable<T>
+    public class SLSet<T> : SLQuery<T> where T : class
     {
-        private readonly SLContext _slContext;
-        private readonly string _path;
+        private readonly SLContext _context;
 
-        public SLSet(SLContext slContext, string path)
+        public SLSet(SLContext sl_context, string resource) : base(sl_context, resource)
         {
-            _slContext = slContext;
-            _path = path;
-            Expression = Expression.Constant(this);
-            Provider = new SLQueryProvider(_slContext, path);
+            _context = sl_context;
         }
 
-        public SLSet(SLQueryProvider queryProvider, Expression predicate)
+        public SLSet(SLContext sl_context, string resource, Expression defaultExpression) : base(sl_context, resource, defaultExpression)
         {
-            _slContext = queryProvider.Context;
-            _path = queryProvider.Path;
-            Expression = predicate;
-            Provider = queryProvider;
+            _context = sl_context;
         }
 
-        public Type ElementType => typeof(T);
-
-        public Expression Expression { get; internal set; }
-
-        public IQueryProvider Provider { get; }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
-        {
-            await _slContext.LoginAsync(cancellationToken: cancellationToken);
-            var values = GetKeyValue(entity);
-            var uri = $"{_path}({string.Join(',', values)})";
-            await _slContext.HttpClient.PatchJsonAsync(uri, entity, cancellationToken);
-        }
-
-        public async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
-        {
-            await _slContext.LoginAsync(cancellationToken: cancellationToken);
-            var values = GetKeyValue(entity);
-            var uri = $"{_path}({string.Join(',', values)})";
-            await _slContext.HttpClient.SendDeleteAsync(uri, cancellationToken);
-        }
-
+        /// <summary>
+        /// Agrega un nuevo elemento al recurso
+        /// </summary>
+        /// <param name="entity">Elemento a agregar</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            await _slContext.LoginAsync(cancellationToken: cancellationToken);
+            using var request = new HttpRequestMessage(HttpMethod.Post, Resource)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(entity)),
+            };
 
-#pragma warning disable IDE0059 // Asignación innecesaria de un valor
-            entity = await _slContext.HttpClient.PostJsonAsync<T>(_path, entity, cancellationToken);
-#pragma warning restore IDE0059 // Asignación innecesaria de un valor
+            entity = await _context.ExecuteAsync<T>(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Acutaliza un elemento del recurso
+        /// </summary>
+        /// <param name="entity">Elemento a actualizar</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+        {
+            var values = GetKeyValue(entity);
+            var uri = $"{Resource}({string.Join(',', values)})";
+
+            using var request = new HttpRequestMessage(HttpMethod.Patch, uri)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(entity))
+            };
+
+            await _context.ExecuteAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Elimina un elemento del recurso
+        /// </summary>
+        /// <param name="entity">Elemento a eliminar</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
+        {
+            var values = GetKeyValue(entity);
+            var uri = $"{Resource}({string.Join(',', values)})";
+            using var request = new HttpRequestMessage(HttpMethod.Delete, uri);
+            await _context.ExecuteAsync(request, cancellationToken);
+        }
+
+        public override SLQuery<T> Where(Expression<Func<T, bool>> predicate)
+        {
+            return new SLSet<T>(_context, Resource, predicate);
         }
 
         private static List<string> GetKeyValue(T entity)
