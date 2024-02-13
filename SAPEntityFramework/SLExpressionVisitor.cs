@@ -53,6 +53,22 @@ namespace SAPSLFramework
             return node;
         }
 
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            switch (node.Method.Name.ToLower())
+            {
+                case "startswith":
+                    var memberName = ((MemberExpression)node.Object).Member.Name;
+                    var argument = ((ConstantExpression)node.Arguments[0]).Value;
+                    Filter += $"startswith({memberName},{GetFormattedString(argument)})";
+                    break;
+                default:
+                    throw new InvalidOperationException("Query inválido");
+            }
+
+            return node;
+        }
+
         private static string GetFormattedString(object obj)
         {
             if (obj.GetType() == typeof(string))
