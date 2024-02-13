@@ -4,6 +4,8 @@ namespace SAPSLFramework
 {
     internal class SLExpressionVisitor : ExpressionVisitor
     {
+        private readonly string[] _queryFunctions = new string[] { "startswith", "endswith", "contains", "substringof" };
+
         public SLExpressionVisitor()
         {
             Filter = string.Empty;
@@ -55,15 +57,17 @@ namespace SAPSLFramework
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            switch (node.Method.Name.ToLower())
+            var methodName = node.Method.Name.ToLower();
+
+            if (_queryFunctions.Any(x => x == methodName))
             {
-                case "startswith":
-                    var memberName = ((MemberExpression)node.Object).Member.Name;
-                    var argument = ((ConstantExpression)node.Arguments[0]).Value;
-                    Filter += $"startswith({memberName},{GetFormattedString(argument)})";
-                    break;
-                default:
-                    throw new InvalidOperationException("Query inválido");
+                var memberName = ((MemberExpression)node.Object).Member.Name;
+                var argument = ((ConstantExpression)node.Arguments[0]).Value;
+                Filter += $"{methodName}({memberName},{GetFormattedString(argument)})";
+            }
+            else
+            {
+                throw new InvalidOperationException("Query inválido");
             }
 
             return node;
