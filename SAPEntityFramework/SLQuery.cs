@@ -128,13 +128,25 @@ namespace SAPSLFramework
             else
             {
                 var exp = (LambdaExpression)_selectExpression;
-                var body = (MemberInitExpression)exp.Body;
 
-                var assigments = body.Bindings
-                    .Where(x => x.BindingType == MemberBindingType.Assignment)
-                    .Select(x => (MemberAssignment)x);
+                if (exp.Body is MemberInitExpression body)
+                {
+                    body = (MemberInitExpression)exp.Body;
 
-                names = assigments.Select(x => ((MemberExpression)x.Expression).Member.Name);
+                    var assigments = body.Bindings
+                        .Where(x => x.BindingType == MemberBindingType.Assignment)
+                        .Select(x => (MemberAssignment)x);
+
+                    names = assigments.Select(x => ((MemberExpression)x.Expression).Member.Name);
+                }
+                else if(exp.Body is MemberExpression memberExp)
+                {
+                    names = new string[] { memberExp.Member.Name };
+                }
+                else
+                {
+                    throw new InvalidOperationException("Expresión inválida");
+                }
             }
 
             var fields = string.Join(',', names);
