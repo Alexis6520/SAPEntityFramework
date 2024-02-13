@@ -11,7 +11,6 @@ namespace SAPSLFramework
         private SLContextOptions _options;
         private SLSession _session;
         private readonly HttpClient _httpClient;
-        private bool _inLogin;
 
         public SLContext(SLContextOptions options)
         {
@@ -35,14 +34,15 @@ namespace SAPSLFramework
         {
             try
             {
-                var errorResponse = await response.Content.ReadFromJsonAsync<SLErrorResponse>(cancellationToken: cancellationToken);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var errorResponse = await response.Content.ReadFromJsonAsync<SLErrorResponse>(options, cancellationToken: cancellationToken);
                 var error = errorResponse.Error;
-                return new SLException(error.Message, error.Code);
+                return new SLException(error.Message.Value, error.Code);
             }
             catch (Exception)
             {
                 var stringContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                return new SLException(stringContent, $"{response.StatusCode}");
+                return new SLException(stringContent, (int)response.StatusCode);
             }
         }
 
@@ -74,7 +74,7 @@ namespace SAPSLFramework
 
         internal async Task<T> ExecuteAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
         {
-            if ((_session == null || _session.IsExpired) && !_inLogin)
+            if (_session == null || _session.IsExpired)
             {
                 await LoginAsync(cancellationToken: cancellationToken);
             }
@@ -103,30 +103,53 @@ namespace SAPSLFramework
 
         private async Task LoginAsync(CancellationToken cancellationToken = default)
         {
-            _inLogin = true;
-
-            if (_session == null || _session.IsExpired)
+            if (_session != null && !_session.IsExpired)
             {
-                var body = new
-                {
-                    CompanyDB = _options.CompanyDB ?? throw new SLException("No se ha proporcionado una base de datos"),
-                    UserName = _options.UserName ?? throw new SLException("No se proporcionó un usuario"),
-                    Password = _options.Password ?? throw new SLException("No se proporcionó una contraseña"),
-                    Language = _options.Language ?? 25
-                };
-
-                using var request = new HttpRequestMessage(HttpMethod.Post, "Login")
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(body))
-                };
-
-                _session = await ExecuteAsync<SLSession>(request, cancellationToken);
-                _session.LastLogin = DateTime.Now.AddSeconds(1);
-                _httpClient.DefaultRequestHeaders.Remove("B1SESSION");
-                _httpClient.DefaultRequestHeaders.Add("B1SESSION", _session.SessionId);
+                return;
             }
 
-            _inLogin = false;
+            var body = new
+            {
+                CompanyDB = _options.CompanyDB ?? throw new SLException("No se ha proporcionado una base de datos"),
+                UserName = _options.UserName ?? throw new SLException("No se proporcionó un usuario"),
+                Password = _options.Password ?? throw new SLException("No se proporcionó una contraseña"),
+                Language = _options.Language ?? 25
+            };
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, "Login")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(body))
+            };
+
+            try
+            {
+                using var response = await _httpClient.SendAsync(request, cancellationToken: cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw await GetExceptionAsync(response, cancellationToken);
+                }
+
+                await SetSession(response, cancellationToken);
+            }
+            catch (SLException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new SLException("No se pudo iniciar sesión", null, ex);
+            }
+        }
+
+        private async Task SetSession(HttpResponseMessage response, CancellationToken cancellationToken = default)
+        {
+            var serializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            _session = await response.Content.ReadFromJsonAsync<SLSession>(serializerOptions, cancellationToken: cancellationToken);
+            _session.LastLogin = DateTime.Now.AddSeconds(1);
+            var cookies = response.Headers.GetValues("Set-Cookie");
+            _httpClient.DefaultRequestHeaders.Remove("Cookie");
+            _httpClient.DefaultRequestHeaders.Add("Cookie", cookies);
         }
 
         private async Task LogoutAsync(CancellationToken cancellationToken = default)

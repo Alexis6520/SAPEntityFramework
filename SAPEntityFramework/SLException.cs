@@ -8,9 +8,9 @@
         /// <summary>
         /// Código de error
         /// </summary>
-        public string Code { get; set; }
+        public int? Code { get; set; }
 
-        public SLException(string message, string code = null, Exception innerException = null) : base(message, innerException)
+        public SLException(string message, int? code = null, Exception innerException = null) : base(message, innerException)
         {
             Code = code;
         }
@@ -23,7 +23,12 @@
 
     internal class SLError
     {
-        public string Code { get; set; }
-        public string Message { get; set; }
+        public int Code { get; set; }
+        public SlErrorMessage Message { get; set; }
+    }
+
+    internal class SlErrorMessage
+    {
+        public string Value { get; set; }
     }
 }

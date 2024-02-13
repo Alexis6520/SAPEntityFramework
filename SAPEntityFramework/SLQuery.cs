@@ -33,21 +33,34 @@ namespace SAPSLFramework
         /// <returns></returns>
         public async Task<List<T>> ToListAsync(CancellationToken cancellationToken = default)
         {
-            var uri = GetUri(typeof(T));
+            var uri = GetUri(Resource, typeof(T));
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
             var response = await _context.ExecuteAsync<SLResponse<List<T>>>(request, cancellationToken);
             return response.Value;
         }
 
+        /// <summary>
+        /// Obtiene la primera coincidencia
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<T> FirstAsync(CancellationToken cancellationToken = default)
         {
-            var uri = GetUri(typeof(T));
+            var uri = GetUri(Resource, typeof(T));
             using var request = new HttpRequestMessage(HttpMethod.Get, uri + "&$top=1");
             var response = await _context.ExecuteAsync<SLResponse<List<T>>>(request, cancellationToken);
             return response.Value.FirstOrDefault();
         }
 
-        private string GetUri(Type type)
+        public async Task<bool> AnyAsync(CancellationToken cancellationToken = default)
+        {
+            var uri = GetUri($"{Resource}/$count", typeof(T));
+            using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+            var response = await _context.ExecuteAsync<int>(request, cancellationToken);
+            return response > 0;
+        }
+
+        private string GetUri(string resource, Type type)
         {
             var expVisitor = new SLExpressionVisitor();
             expVisitor.Visit(_queryExpression);
@@ -58,7 +71,7 @@ namespace SAPSLFramework
                 $"$select={Select(type)}"
             };
 
-            var uri = $"{Resource}?{string.Join('&', queries.Where(x => x != null))}";
+            var uri = $"{resource}?{string.Join('&', queries.Where(x => x != null))}";
             return uri;
         }
 
