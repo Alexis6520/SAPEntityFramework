@@ -8,7 +8,7 @@ namespace SAPSLFramework
     /// Proporciona acceso a un recurso de Service Layer
     /// </summary>
     /// <typeparam name="T">Tipo en el que se basa el recurso</typeparam>
-    public class SLSet<T> : SLQuery<T> where T : class
+    public class SLSet<T> : SLQuery<T>
     {
         private readonly SLContext _context;
 

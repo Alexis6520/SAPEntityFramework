@@ -11,5 +11,6 @@ namespace Test
         public string BarCode { get; set; }
         public string U_SATCLAVEUNIDADARTI { get; set; }
         public string U_SATCLAVEARTICULO { get; set; }
+        public DateTime CreateDate { get; set; }
     }
 }

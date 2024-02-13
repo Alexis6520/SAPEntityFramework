@@ -98,7 +98,7 @@ namespace SAPSLFramework
         /// <typeparam name="I"></typeparam>
         /// <param name="selector"></param>
         /// <returns></returns>
-        public abstract SLQuery<I> Select<I>(Expression<Func<T, I>> selector) where I : class;
+        public abstract SLQuery<I> Select<I>(Expression<Func<T, I>> selector);
 
         private string GetUri(string resource)
         {
