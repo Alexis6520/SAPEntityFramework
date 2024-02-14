@@ -52,4 +52,6 @@ var orderSkip = await context.Items.Where(x => x.ItemCode.StartsWith("PRUEBA"))
     .Skip(7)
     .Top(10)
     .ToListAsync();
+
+var countItems = await context.Items.Where(x => x.ItemName.Contains("ba")).CountAsync();
 Console.WriteLine();

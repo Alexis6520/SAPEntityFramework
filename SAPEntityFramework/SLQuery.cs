@@ -84,10 +84,15 @@ namespace SAPSLFramework
         /// <returns></returns>
         public async Task<bool> AnyAsync(CancellationToken cancellationToken = default)
         {
+            var count = await CountAsync(cancellationToken);
+            return count > 0;
+        }
+
+        public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+        {
             var uri = GetUri($"{Resource}/$count");
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-            var response = await _context.ExecuteAsync<int>(request, cancellationToken);
-            return response > 0;
+            return await _context.ExecuteAsync<int>(request, cancellationToken);
         }
 
         /// <summary>
