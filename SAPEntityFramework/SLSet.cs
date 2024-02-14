@@ -12,19 +12,14 @@ namespace SAPSLFramework
     {
         private readonly SLContext _context;
 
-        public SLSet(SLContext sl_context, string resource) : base(sl_context, resource)
+        public SLSet(SLContext slContext, string resource) : base(slContext, resource)
         {
-            _context = sl_context;
+            _context = slContext;
         }
 
-        public SLSet(SLContext sl_context, string resource, Expression defaultExpression) : base(sl_context, resource, defaultExpression)
+        public SLSet(SLContext slContext, string resource, IDictionary<string, Expression> expressions) : base(slContext, resource, expressions)
         {
-            _context = sl_context;
-        }
-
-        public SLSet(SLContext sl_context, string resource, Expression defaultExpression, Expression selectExpression) : base(sl_context, resource, defaultExpression, selectExpression)
-        {
-            _context = sl_context;
+            _context = slContext;
         }
 
         /// <summary>
@@ -78,12 +73,46 @@ namespace SAPSLFramework
 
         public override SLQuery<T> Where(Expression<Func<T, bool>> predicate)
         {
-            return new SLSet<T>(_context, Resource, predicate);
+            _expressions.Remove("select");
+
+            if (_expressions.ContainsKey("query"))
+            {
+                _expressions["query"] = predicate;
+            }
+            else
+            {
+                _expressions.Add("query", predicate);
+            }
+
+            return new SLSet<T>(_context, Resource, _expressions);
         }
 
         public override SLQuery<I> Select<I>(Expression<Func<T, I>> selector)
         {
-            return new SLSet<I>(_context, Resource, _queryExpression, selector);
+            if (_expressions.ContainsKey("select"))
+            {
+                _expressions["select"] = selector;
+            }
+            else
+            {
+                _expressions.Add("select", selector);
+            }
+
+            return new SLSet<I>(_context, Resource, _expressions);
+        }
+
+        public override SLQuery<T> OrderBy<TKey>(Expression<Func<T, TKey>> key)
+        {
+            if (_expressions.ContainsKey("orderby"))
+            {
+                _expressions["orderby"] = key;
+            }
+            else
+            {
+                _expressions.Add("orderby", key);
+            }
+
+            return new SLSet<T>(_context, Resource, _expressions);
         }
 
         /// <summary>

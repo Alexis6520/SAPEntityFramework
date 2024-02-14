@@ -9,15 +9,13 @@ namespace SAPSLFramework
     public abstract class SLQuery<T>
     {
         private readonly SLContext _context;
-        protected readonly Expression _queryExpression;
-        protected readonly Expression _selectExpression;
+        protected readonly IDictionary<string, Expression> _expressions;
 
-        public SLQuery(SLContext context, string resource, Expression queryExpression = null, Expression selectExpression = null)
+        public SLQuery(SLContext context, string resource, IDictionary<string, Expression> expressions = null)
         {
+            _expressions = expressions ?? new Dictionary<string, Expression>();
             _context = context;
-            _queryExpression = queryExpression;
             Resource = resource;
-            _selectExpression = selectExpression;
         }
 
         public string Resource { get; private set; }
@@ -41,12 +39,12 @@ namespace SAPSLFramework
             var response = await _context.ExecuteAsync<SLResponse<List<object>>>(request, cancellationToken);
             var jsonValues = response.Value.Select(x => JsonSerializer.Serialize(x));
 
-            if (_selectExpression == null)
+            if (!_expressions.ContainsKey("select"))
             {
                 return jsonValues.Select(x => JsonSerializer.Deserialize<T>(x)).ToList();
             }
 
-            var exp = (LambdaExpression)_selectExpression;
+            var exp = (LambdaExpression)_expressions["select"];
             var type = exp.Parameters[0].Type;
             var deleg = exp.Compile();
             var results = jsonValues.Select(x => JsonSerializer.Deserialize(x, type));
@@ -66,12 +64,12 @@ namespace SAPSLFramework
             var response = await _context.ExecuteAsync<SLResponse<List<object>>>(request, cancellationToken);
             var jsonValues = response.Value.Select(x => JsonSerializer.Serialize(x));
 
-            if (_selectExpression == null)
+            if (!_expressions.ContainsKey("select"))
             {
                 return jsonValues.Select(x => JsonSerializer.Deserialize<T>(x)).FirstOrDefault();
             }
 
-            var exp = (LambdaExpression)_selectExpression;
+            var exp = (LambdaExpression)_expressions["select"];
             var type = exp.Parameters[0].Type;
             var deleg = exp.Compile();
             var results = jsonValues.Select(x => JsonSerializer.Deserialize(x, type));
@@ -100,19 +98,44 @@ namespace SAPSLFramework
         /// <returns></returns>
         public abstract SLQuery<I> Select<I>(Expression<Func<T, I>> selector);
 
+        /// <summary>
+        /// Ordena los resultados por las propiedades seleccionadas
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public abstract SLQuery<T> OrderBy<TKey>(Expression<Func<T, TKey>> expression);
+
         private string GetUri(string resource)
         {
             var expVisitor = new SLExpressionVisitor();
-            expVisitor.Visit(_queryExpression);
+            expVisitor.Visit(_expressions["query"]);
 
             var queries = new List<string>
             {
                 string.IsNullOrEmpty(expVisitor.Filter) ? null : $"$filter={expVisitor.Filter}",
-                $"$select={Select()}"
+                $"$select={Select()}",
+                _expressions.ContainsKey("orderby")? $"$orderby={Order()}":null
             };
 
             var uri = $"{resource}?{string.Join('&', queries.Where(x => x != null))}";
             return uri;
+        }
+
+        private string Order()
+        {
+            var exp = (LambdaExpression)_expressions["orderby"];
+            var names = new List<string>();
+
+            if (exp.Body is MemberExpression m)
+            {
+                names.Add(m.Member.Name);
+            }
+            else if (exp.Body is NewExpression n)
+            {
+                names.AddRange(n.Arguments.Select(x => ((MemberExpression)x).Member.Name));
+            }
+
+            return exp != null ? string.Join(" asc,", names) : null;
         }
 
         private string Select()
@@ -120,14 +143,14 @@ namespace SAPSLFramework
             Type type = typeof(T);
             IEnumerable<string> names;
 
-            if (_selectExpression == null)
+            if (!_expressions.ContainsKey("select"))
             {
                 names = type.GetProperties()
                     .Select(x => $"{char.ToUpper(x.Name[0])}{x.Name[1..]}");
             }
             else
             {
-                var exp = (LambdaExpression)_selectExpression;
+                var exp = (LambdaExpression)_expressions["select"];
 
                 if (exp.Body is MemberInitExpression body)
                 {
@@ -139,7 +162,7 @@ namespace SAPSLFramework
 
                     names = assigments.Select(x => ((MemberExpression)x.Expression).Member.Name);
                 }
-                else if(exp.Body is MemberExpression memberExp)
+                else if (exp.Body is MemberExpression memberExp)
                 {
                     names = new string[] { memberExp.Member.Name };
                 }
