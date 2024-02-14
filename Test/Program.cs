@@ -45,5 +45,5 @@ var endsWithItems = await context.Items.Where(x => x.ItemName.EndsWith("layer"))
 var containsItems = await context.Items.Where(x => x.ItemName.Contains("ba")).Select(x => new Activity { DocNum = x.ItemCode }).FirstAsync();
 var endsAndSelectItems = await context.Items.Where(x => x.ItemName.EndsWith("layer")).Select(x => new Activity { DocNum = x.ItemName }).ToListAsync();
 var itemNames = await context.Items.Where(x => x.ItemName.EndsWith("layer")).Select(x => x.ItemName).ToListAsync();
-var dates=await context.Items.Where(x => x.ItemName.Contains("ba")).Select(x => x.CreateDate).ToListAsync();
+var dates = await context.Items.Where(x => x.CreateDate < DateTime.Now).Select(x => x.CreateDate).FirstAsync();
 Console.WriteLine();

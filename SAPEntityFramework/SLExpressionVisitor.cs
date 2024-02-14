@@ -27,7 +27,7 @@ namespace SAPSLFramework
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            if (node.Expression.NodeType == ExpressionType.MemberAccess || node.Expression.NodeType == ExpressionType.Constant)
+            if (node.Expression == null || node.Expression.NodeType == ExpressionType.Constant || node.Expression.NodeType == ExpressionType.MemberAccess)
             {
                 var objectMember = Expression.Convert(node, typeof(object));
                 var getter = Expression.Lambda<Func<object>>(objectMember).Compile();
@@ -75,9 +75,13 @@ namespace SAPSLFramework
 
         private static string GetFormattedString(object obj)
         {
-            if (obj.GetType() == typeof(string))
+            if (obj is string s)
             {
-                return $"'{obj}'";
+                return $"'{s}'";
+            }
+            else if (obj is DateTime d)
+            {
+                return $"'{d:yyyy-MM-ddTHH:mm:ss}'";
             }
             else
             {
