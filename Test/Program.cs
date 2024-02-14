@@ -47,4 +47,9 @@ var endsAndSelectItems = await context.Items.Where(x => x.ItemName.EndsWith("lay
 var itemNames = await context.Items.Where(x => x.ItemName.EndsWith("layer")).Select(x => x.ItemName).ToListAsync();
 var dates = await context.Items.Where(x => x.CreateDate < DateTime.Now).Select(x => x.CreateDate).FirstAsync();
 var orderByItems = await context.Items.Where(x => x.ItemCode.StartsWith("PRUEBA")).OrderBy(x => new { x.ItemCode, x.ItemName }).ToListAsync();
+var orderSkip = await context.Items.Where(x => x.ItemCode.StartsWith("PRUEBA"))
+    .OrderBy(x => new { x.ItemCode, x.ItemName })
+    .Skip(7)
+    .Top(10)
+    .ToListAsync();
 Console.WriteLine();

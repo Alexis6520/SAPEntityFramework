@@ -105,6 +105,20 @@ namespace SAPSLFramework
         /// <returns></returns>
         public abstract SLQuery<T> OrderBy<TKey>(Expression<Func<T, TKey>> expression);
 
+        /// <summary>
+        /// Toma los siguientes n elementos
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public abstract SLQuery<T> Top(int n);
+
+        /// <summary>
+        /// Salta los primeros n elementos
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public abstract SLQuery<T> Skip(int n);
+
         private string GetUri(string resource)
         {
             var expVisitor = new SLExpressionVisitor();
@@ -114,11 +128,29 @@ namespace SAPSLFramework
             {
                 string.IsNullOrEmpty(expVisitor.Filter) ? null : $"$filter={expVisitor.Filter}",
                 $"$select={Select()}",
-                _expressions.ContainsKey("orderby")? $"$orderby={Order()}":null
+                _expressions.ContainsKey("orderby")? $"$orderby={Order()}":null,
+                _expressions.ContainsKey("top")?$"$top={Top()}":null,
+                _expressions.ContainsKey("skip")?$"$skip={Skip()}":null,
             };
 
             var uri = $"{resource}?{string.Join('&', queries.Where(x => x != null))}";
             return uri;
+        }
+
+        private string Top()
+        {
+            var exp = (LambdaExpression)_expressions["top"];
+            var del = exp.Compile();
+            var n = (int)del.DynamicInvoke();
+            return $"{n}";
+        }
+
+        private string Skip()
+        {
+            var exp = (LambdaExpression)_expressions["skip"];
+            var del = exp.Compile();
+            var n = (int)del.DynamicInvoke();
+            return $"{n}";
         }
 
         private string Order()

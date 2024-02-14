@@ -74,6 +74,9 @@ namespace SAPSLFramework
         public override SLQuery<T> Where(Expression<Func<T, bool>> predicate)
         {
             _expressions.Remove("select");
+            _expressions.Remove("orderby");
+            _expressions.Remove("top");
+            _expressions.Remove("skip");
 
             if (_expressions.ContainsKey("query"))
             {
@@ -110,6 +113,34 @@ namespace SAPSLFramework
             else
             {
                 _expressions.Add("orderby", key);
+            }
+
+            return new SLSet<T>(_context, Resource, _expressions);
+        }
+
+        public override SLQuery<T> Top(int n)
+        {
+            if (_expressions.ContainsKey("top"))
+            {
+                _expressions["top"] = () => n;
+            }
+            else
+            {
+                _expressions.Add("top", () => n);
+            }
+
+            return new SLSet<T>(_context, Resource, _expressions);
+        }
+
+        public override SLQuery<T> Skip(int n)
+        {
+            if (_expressions.ContainsKey("skip"))
+            {
+                _expressions["skip"] = () => n;
+            }
+            else
+            {
+                _expressions.Add("skip", () => n);
             }
 
             return new SLSet<T>(_context, Resource, _expressions);
