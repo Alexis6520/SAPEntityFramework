@@ -62,7 +62,20 @@ namespace SAPSLFramework
             if (_queryFunctions.Any(x => x == methodName))
             {
                 var memberName = ((MemberExpression)node.Object).Member.Name;
-                var argument = ((ConstantExpression)node.Arguments[0]).Value;
+                object argument = null;
+
+                if (node.Arguments[0] is ConstantExpression consExp)
+                {
+                    argument = consExp.Value;
+                }
+                else 
+                {
+                    var memExp = (MemberExpression)node.Arguments[0];
+                    var objectMember = Expression.Convert(memExp, typeof(object));
+                    var getter = Expression.Lambda<Func<object>>(objectMember).Compile();
+                    argument = getter();
+                }
+
                 Filter += $"{methodName}({memberName},{GetFormattedString(argument)})";
             }
             else

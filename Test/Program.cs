@@ -12,7 +12,8 @@ var options = new SLContextOptions()
 
 using var context = new AppSLContext(options);
 
-var items = await context.Items.Top(10).ToListAsync();
+var input = "prueba";
+var items = await context.Items.Where(x=>x.ItemName.Contains(input)).Top(10).ToListAsync();
 
 var item = new Item
 {
