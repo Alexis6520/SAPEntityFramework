@@ -127,7 +127,11 @@ namespace SAPSLFramework
         private string GetUri(string resource)
         {
             var expVisitor = new SLExpressionVisitor();
-            expVisitor.Visit(_expressions["query"]);
+
+            if (_expressions.ContainsKey("query"))
+            {
+                expVisitor.Visit(_expressions["query"]);
+            }
 
             var queries = new List<string>
             {
