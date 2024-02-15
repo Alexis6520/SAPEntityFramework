@@ -96,6 +96,7 @@ namespace SAPSLFramework
                 ExpressionType.Equal => "eq",
                 ExpressionType.And or ExpressionType.AndAlso => "and",
                 ExpressionType.Or => "or",
+                ExpressionType.OrElse => "or",
                 ExpressionType.Not => "not",
                 ExpressionType.LessThanOrEqual => "le",
                 ExpressionType.LessThan => "lt",

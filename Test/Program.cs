@@ -40,7 +40,7 @@ await context.Items.UpdateAsync(requestedItem);
 await context.Items.ExecuteActionAsync(item, "Cancel");
 await context.Items.DeleteAsync(requestedItem);
 var a = await context.ExecuteActionAsync<List<Activity>>("ActivitiesService_GetActivityList");
-var startsWithItems = await context.Items.Where(x => x.ItemCode.StartsWith("PRUEBA")).Select(x => new Activity(x.ItemCode)).ToListAsync();
+var startsWithItems = await context.Items.Where(x => x.ItemCode.StartsWith("PRUEBA") || x.ItemName=="Llanta").Select(x => new Activity(x.ItemCode)).ToListAsync();
 var endsWithItems = await context.Items.Where(x => x.ItemName.EndsWith("layer")).ToListAsync();
 var containsItems = await context.Items.Where(x => x.ItemName.Contains("ba")).Select(x => new Activity { DocNum = x.ItemCode }).FirstAsync();
 var endsAndSelectItems = await context.Items.Where(x => x.ItemName.EndsWith("layer")).Select(x => new Activity { DocNum = x.ItemName }).ToListAsync();
