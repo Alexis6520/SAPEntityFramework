@@ -13,7 +13,7 @@ var options = new SLContextOptions()
 using var context = new AppSLContext(options);
 
 var input = "prueba";
-var items = await context.Items.Where(x=>x.ItemName.Contains(input)).Top(10).ToListAsync();
+var items = await context.Items.Where(x => x.ItemName.Contains(input)).Top(10).Select(x => new Activity { DocNum = "a" }).ToListAsync();
 
 var item = new Item
 {

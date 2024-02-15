@@ -133,10 +133,12 @@ namespace SAPSLFramework
                 expVisitor.Visit(_expressions["query"]);
             }
 
+            var select = Select();
+
             var queries = new List<string>
             {
                 string.IsNullOrEmpty(expVisitor.Filter) ? null : $"$filter={expVisitor.Filter}",
-                $"$select={Select()}",
+                string.IsNullOrEmpty(select)? null : $"$select={select}",
                 _expressions.ContainsKey("orderby")? $"$orderby={Order()}":null,
                 _expressions.ContainsKey("top")?$"$top={Top()}":null,
                 _expressions.ContainsKey("skip")?$"$skip={Skip()}":null,
@@ -182,12 +184,12 @@ namespace SAPSLFramework
         private string Select()
         {
             Type type = typeof(T);
-            IEnumerable<string> names;
+            List<string> names = new();
 
             if (!_expressions.ContainsKey("select"))
             {
                 names = type.GetProperties()
-                    .Select(x => $"{char.ToUpper(x.Name[0])}{x.Name[1..]}");
+                    .Select(x => $"{char.ToUpper(x.Name[0])}{x.Name[1..]}").ToList();
             }
             else
             {
@@ -200,14 +202,27 @@ namespace SAPSLFramework
                             .Where(x => x.BindingType == MemberBindingType.Assignment)
                             .Select(x => (MemberAssignment)x);
 
-                        names = assigments.Select(x => ((MemberExpression)x.Expression).Member.Name);
+                        foreach (var assigment in assigments)
+                        {
+                            if (assigment.Expression is MemberExpression membExp)
+                            {
+                                names.Add(membExp.Member.Name);
+                            }
+                            else if (assigment.Expression is MethodCallExpression methCallExp)
+                            {
+                                var unaryExps = methCallExp.Arguments.Where(x => x is UnaryExpression).Select(x => (UnaryExpression)x);
+                                unaryExps = unaryExps.Where(x => x.Operand is MemberExpression);
+                                var memberExps = unaryExps.Select(x => (MemberExpression)x.Operand);
+                                names.AddRange(memberExps.Select(x => x.Member.Name));
+                            }
+                        }
                         break;
                     case MemberExpression body:
-                        names = new string[] { body.Member.Name };
+                        names = new List<string> { body.Member.Name };
                         break;
                     case NewExpression body:
                         var members = body.Arguments.Select(x => (MemberExpression)x);
-                        names = members.Select(x => x.Member.Name);
+                        names = members.Select(x => x.Member.Name).ToList();
                         break;
                     default:
                         throw new InvalidOperationException("Expresión select inválida");
