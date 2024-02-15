@@ -27,6 +27,7 @@ namespace SAPSLFramework
             };
 
             _httpClient.DefaultRequestHeaders.Add("B1S-PageSize", "0");
+            _httpClient.DefaultRequestHeaders.Add("B1S-ReplaceCollectionsOnPatch", "true");
             InitializeSets();
         }
 
