@@ -186,14 +186,10 @@ namespace SAPSLFramework
             Type type = typeof(T);
             List<string> names = new();
 
-            if (!_expressions.ContainsKey("select"))
-            {
-                names = type.GetProperties()
-                    .Select(x => $"{char.ToUpper(x.Name[0])}{x.Name[1..]}").ToList();
-            }
-            else
+            if (_expressions.ContainsKey("select"))
             {
                 var exp = (LambdaExpression)_expressions["select"];
+                var availableProps = exp.Parameters[0].Type.GetProperties().Select(x => x.Name).ToList();
 
                 switch (exp.Body)
                 {
@@ -202,20 +198,9 @@ namespace SAPSLFramework
                             .Where(x => x.BindingType == MemberBindingType.Assignment)
                             .Select(x => (MemberAssignment)x);
 
-                        foreach (var assigment in assigments)
-                        {
-                            if (assigment.Expression is MemberExpression membExp)
-                            {
-                                names.Add(membExp.Member.Name);
-                            }
-                            else if (assigment.Expression is MethodCallExpression methCallExp)
-                            {
-                                var unaryExps = methCallExp.Arguments.Where(x => x is UnaryExpression).Select(x => (UnaryExpression)x);
-                                unaryExps = unaryExps.Where(x => x.Operand is MemberExpression);
-                                var memberExps = unaryExps.Select(x => (MemberExpression)x.Operand);
-                                names.AddRange(memberExps.Select(x => x.Member.Name));
-                            }
-                        }
+                        var assigmentNames = GetNamesFromAssigments(assigments);
+                        assigmentNames = assigmentNames.Where(x => availableProps.Any(y => y == x));
+                        names.AddRange(assigmentNames);
                         break;
                     case MemberExpression body:
                         names = new List<string> { body.Member.Name };
@@ -227,10 +212,46 @@ namespace SAPSLFramework
                     default:
                         throw new InvalidOperationException("Expresión select inválida");
                 }
+
+                return string.Join(',', names);
             }
 
-            var fields = string.Join(',', names);
-            return fields;
+            names = type.GetProperties()
+                    .Select(x => $"{char.ToUpper(x.Name[0])}{x.Name[1..]}").ToList();
+
+            return string.Join(',', names);
+        }
+
+        private static IEnumerable<string> GetNamesFromAssigments(IEnumerable<MemberAssignment> assigments)
+        {
+            var names = new List<string>();
+
+            foreach (var assigment in assigments)
+            {
+                if (assigment.Expression is MemberExpression membExp)
+                {
+                    names.Add(membExp.Member.Name);
+                }
+                else if (assigment.Expression is MethodCallExpression methCallExp)
+                {
+                    foreach (var arg in methCallExp.Arguments)
+                    {
+                        if (arg is UnaryExpression unaryExp)
+                        {
+                            if (unaryExp.Operand is MemberExpression memberExp)
+                            {
+                                names.Add(memberExp.Member.Name);
+                            }
+                        }
+                        else if (arg is MemberExpression memberExp)
+                        {
+                            names.Add(memberExp.Member.Name);
+                        }
+                    }
+                }
+            }
+
+            return names;
         }
     }
 }
