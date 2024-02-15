@@ -189,23 +189,24 @@ namespace SAPSLFramework
             {
                 var exp = (LambdaExpression)_expressions["select"];
 
-                if (exp.Body is MemberInitExpression body)
+                switch (exp.Body)
                 {
-                    body = (MemberInitExpression)exp.Body;
+                    case MemberInitExpression body:
+                        var assigments = body.Bindings
+                            .Where(x => x.BindingType == MemberBindingType.Assignment)
+                            .Select(x => (MemberAssignment)x);
 
-                    var assigments = body.Bindings
-                        .Where(x => x.BindingType == MemberBindingType.Assignment)
-                        .Select(x => (MemberAssignment)x);
-
-                    names = assigments.Select(x => ((MemberExpression)x.Expression).Member.Name);
-                }
-                else if (exp.Body is MemberExpression memberExp)
-                {
-                    names = new string[] { memberExp.Member.Name };
-                }
-                else
-                {
-                    throw new InvalidOperationException("Expresión inválida");
+                        names = assigments.Select(x => ((MemberExpression)x.Expression).Member.Name);
+                        break;
+                    case MemberExpression body:
+                        names = new string[] { body.Member.Name };
+                        break;
+                    case NewExpression body:
+                        var members = body.Arguments.Select(x => (MemberExpression)x);
+                        names = members.Select(x => x.Member.Name);
+                        break;
+                    default:
+                        throw new InvalidOperationException("Expresión select inválida");
                 }
             }
 
