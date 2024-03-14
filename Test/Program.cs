@@ -1,4 +1,5 @@
 ﻿using SAPSLFramework;
+using System.Xml.Xsl;
 using Test;
 
 var options = new SLContextOptions()
@@ -11,6 +12,16 @@ var options = new SLContextOptions()
 };
 
 using var context = new AppSLContext(options);
+
+var param = new
+{
+    OriginalItem = new
+    {
+        ItemCode = "RO-62/22",
+    }
+};
+
+var originalItem = await context.ExecuteActionAsync<OriginalItemDTO>("AlternativeItemsService_GetItem", param);
 
 var input = "prueba";
 var items = await context.Items.Where(x => x.ItemName.Contains(input)).Top(10).Select(x => new Activity { DocNum = $"fgh{x.ItemName}" }).ToListAsync();

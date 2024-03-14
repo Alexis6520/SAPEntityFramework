@@ -187,8 +187,8 @@ namespace SAPSLFramework
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, actionName);
             request.Content = content == null ? null : new StringContent(JsonSerializer.Serialize(content));
-            var response = await ExecuteAsync<SLResponse<T>>(request, cancellationToken);
-            return response.Value;
+            var response = await ExecuteAsync<T>(request, cancellationToken);
+            return response;
         }
 
         private void InitializeSets()
