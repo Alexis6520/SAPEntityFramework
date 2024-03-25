@@ -58,6 +58,41 @@ namespace SAPSLFramework
         }
 
         /// <summary>
+        /// Actualiza una entidad ignorando las propiedades seleccionadas
+        /// </summary>
+        /// <param name="entity">Entidad a actualizar</param>
+        /// <param name="props">Propiedades a ignorar</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task UpdateIgnoringAsync(T entity, Expression<Func<T, object>> props, CancellationToken cancellationToken = default)
+        {
+            var json = JsonSerializer.Serialize(entity);
+            var entityProps = JsonSerializer.Deserialize<IDictionary<string, object>>(json);
+
+            if (props.Body is MemberExpression membExp)
+            {
+                entityProps.Remove(membExp.Member.Name);
+            }
+            else if (props.Body is NewExpression newExp)
+            {
+                foreach (var member in newExp.Members)
+                {
+                    entityProps.Remove(member.Name);
+                }
+            }
+
+            var values = GetKeyValue(entity);
+            var uri = $"{Resource}({string.Join(',', values)})";
+
+            using var request = new HttpRequestMessage(HttpMethod.Patch, uri)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(entityProps))
+            };
+
+            await _context.ExecuteAsync(request, cancellationToken);
+        }
+
+        /// <summary>
         /// Elimina un elemento del recurso
         /// </summary>
         /// <param name="entity">Elemento a eliminar</param>
